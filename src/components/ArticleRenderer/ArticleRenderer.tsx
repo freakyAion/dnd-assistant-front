@@ -1,5 +1,5 @@
-import { Title, Text, Anchor } from '@mantine/core';
 import { Link } from 'react-router-dom';
+import { Anchor, Text, Title } from '@mantine/core';
 
 // Types
 interface TextSpan {
@@ -51,13 +51,27 @@ function renderSpan(span: Span, index: number) {
     case 'text':
       return <span key={index}>{span.text}</span>;
     case 'italic':
-      return <Text component="em" key={index} fs="italic" inherit>{span.text}</Text>;
+      return (
+        <Text component="em" key={index} fs="italic" inherit>
+          {span.text}
+        </Text>
+      );
     case 'colored':
-      return <Text component="span" key={index} c={span.color} inherit>{span.text}</Text>;
+      return (
+        <Text component="span" key={index} c={span.color} inherit>
+          {span.text}
+        </Text>
+      );
     case 'link':
-      return span.external
-        ? <Anchor key={index} href={span.href} target="_blank" rel="noopener noreferrer">{span.text}</Anchor>
-        : <Anchor key={index} component={Link} to={span.href}>{span.text}</Anchor>;
+      return span.external ? (
+        <Anchor key={index} href={span.href} target="_blank" rel="noopener noreferrer">
+          {span.text}
+        </Anchor>
+      ) : (
+        <Anchor key={index} component={Link} to={span.href}>
+          {span.text}
+        </Anchor>
+      );
   }
 }
 
@@ -66,7 +80,7 @@ function renderBlock(block: Block, index: number) {
   switch (block.type) {
     case 'heading':
       return (
-        <Title key={index} order={block.level as 1|2|3|4|5|6} mb="sm">
+        <Title key={index} order={block.level as 1 | 2 | 3 | 4 | 5 | 6} mb="sm">
           {block.text}
         </Title>
       );
@@ -86,7 +100,9 @@ interface ArticleRendererProps {
 export function ArticleRenderer({ article }: ArticleRendererProps) {
   return (
     <div>
-      <Title order={1} mb="lg">{article.title}</Title>
+      <Title order={1} mb="lg">
+        {article.title}
+      </Title>
       {article.content.map((block, i) => renderBlock(block, i))}
     </div>
   );

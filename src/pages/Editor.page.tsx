@@ -1,16 +1,36 @@
 import { useState } from 'react';
-import { Title, TextInput, Button, Group, Stack, Select, Textarea, Paper, ActionIcon, Divider, Grid, ScrollArea } from '@mantine/core';
-import { IconTrash, IconPlus } from '@tabler/icons-react';
-import { ArticleRenderer, Article, Block, Span } from '../components/ArticleRenderer/ArticleRenderer';
+import { IconPlus, IconTrash } from '@tabler/icons-react';
+import {
+  ActionIcon,
+  Button,
+  Divider,
+  Grid,
+  Group,
+  Paper,
+  ScrollArea,
+  Select,
+  Stack,
+  Textarea,
+  TextInput,
+  Title,
+} from '@mantine/core';
+import {
+  Article,
+  ArticleRenderer,
+  Block,
+  Span,
+} from '../components/ArticleRenderer/ArticleRenderer';
 
 // ---- Span Editor ----
-function SpanEditor({ spans, onChange }: { spans: Span[], onChange: (spans: Span[]) => void }) {
+function SpanEditor({ spans, onChange }: { spans: Span[]; onChange: (spans: Span[]) => void }) {
   const addSpan = (type: Span['type']) => {
     const base = { type, text: '' };
     const newSpan: Span =
-      type === 'link' ? { type: 'link', text: '', href: '', external: false } :
-      type === 'colored' ? { type: 'colored', text: '', color: 'red' } :
-      base as Span;
+      type === 'link'
+        ? { type: 'link', text: '', href: '', external: false }
+        : type === 'colored'
+          ? { type: 'colored', text: '', color: 'red' }
+          : (base as Span);
     onChange([...spans, newSpan]);
   };
 
@@ -61,8 +81,13 @@ function SpanEditor({ spans, onChange }: { spans: Span[], onChange: (spans: Span
                   <Select
                     size="xs"
                     value={span.external ? 'external' : 'internal'}
-                    data={[{ value: 'internal', label: 'Внутренняя' }, { value: 'external', label: 'Внешняя' }]}
-                    onChange={(val) => updateSpan(i, { ...span, external: val === 'external' } as Span)}
+                    data={[
+                      { value: 'internal', label: 'Внутренняя' },
+                      { value: 'external', label: 'Внешняя' },
+                    ]}
+                    onChange={(val) =>
+                      updateSpan(i, { ...span, external: val === 'external' } as Span)
+                    }
                   />
                 </>
               )}
@@ -74,8 +99,14 @@ function SpanEditor({ spans, onChange }: { spans: Span[], onChange: (spans: Span
         </Paper>
       ))}
       <Group gap="xs">
-        {(['text', 'italic', 'colored', 'link'] as Span['type'][]).map(type => (
-          <Button key={type} size="xs" variant="light" leftSection={<IconPlus size={14} />} onClick={() => addSpan(type)}>
+        {(['text', 'italic', 'colored', 'link'] as Span['type'][]).map((type) => (
+          <Button
+            key={type}
+            size="xs"
+            variant="light"
+            leftSection={<IconPlus size={14} />}
+            onClick={() => addSpan(type)}
+          >
             {type}
           </Button>
         ))}
@@ -85,11 +116,21 @@ function SpanEditor({ spans, onChange }: { spans: Span[], onChange: (spans: Span
 }
 
 // ---- Block Editor ----
-function BlockEditor({ block, onChange, onDelete }: { block: Block, onChange: (b: Block) => void, onDelete: () => void }) {
+function BlockEditor({
+  block,
+  onChange,
+  onDelete,
+}: {
+  block: Block;
+  onChange: (b: Block) => void;
+  onDelete: () => void;
+}) {
   return (
     <Paper p="sm" withBorder>
       <Group justify="space-between" mb="xs">
-        <Title order={6}>{block.type === 'heading' ? `Заголовок H${block.level}` : 'Параграф'}</Title>
+        <Title order={6}>
+          {block.type === 'heading' ? `Заголовок H${block.level}` : 'Параграф'}
+        </Title>
         <ActionIcon color="red" variant="subtle" onClick={onDelete}>
           <IconTrash size={16} />
         </ActionIcon>
@@ -101,7 +142,7 @@ function BlockEditor({ block, onChange, onDelete }: { block: Block, onChange: (b
             label="Уровень"
             size="xs"
             value={String(block.level)}
-            data={['1','2','3','4','5','6']}
+            data={['1', '2', '3', '4', '5', '6']}
             onChange={(val) => onChange({ ...block, level: Number(val) })}
           />
           <TextInput
@@ -126,9 +167,10 @@ export function EditorPage() {
   const [blocks, setBlocks] = useState<Block[]>([]);
 
   const addBlock = (type: Block['type']) => {
-    const newBlock: Block = type === 'heading'
-      ? { type: 'heading', level: 2, text: '' }
-      : { type: 'paragraph', spans: [] };
+    const newBlock: Block =
+      type === 'heading'
+        ? { type: 'heading', level: 2, text: '' }
+        : { type: 'paragraph', spans: [] };
     setBlocks([...blocks, newBlock]);
   };
 
@@ -179,10 +221,18 @@ export function EditorPage() {
               />
             ))}
             <Group>
-              <Button variant="light" leftSection={<IconPlus size={16} />} onClick={() => addBlock('heading')}>
+              <Button
+                variant="light"
+                leftSection={<IconPlus size={16} />}
+                onClick={() => addBlock('heading')}
+              >
                 Заголовок
               </Button>
-              <Button variant="light" leftSection={<IconPlus size={16} />} onClick={() => addBlock('paragraph')}>
+              <Button
+                variant="light"
+                leftSection={<IconPlus size={16} />}
+                onClick={() => addBlock('paragraph')}
+              >
                 Параграф
               </Button>
             </Group>
@@ -195,7 +245,9 @@ export function EditorPage() {
       <Grid.Col span={6} style={{ borderLeft: '1px solid var(--mantine-color-default-border)' }}>
         <ScrollArea h="100%">
           <Paper p="md">
-            <Title order={4} mb="md" c="dimmed">Предпросмотр</Title>
+            <Title order={4} mb="md" c="dimmed">
+              Предпросмотр
+            </Title>
             <ArticleRenderer article={article} />
           </Paper>
         </ScrollArea>
