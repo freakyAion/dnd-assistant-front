@@ -1,5 +1,5 @@
 import { AppShell, NavLink, Stack } from '@mantine/core';
-import { IconHome2, IconUsers, IconBooks, IconWorld, IconSword, IconSparkles, IconSkull } from '@tabler/icons-react';
+import { IconHome2, IconUsers, IconBooks, IconWorld, IconSword, IconSparkles, IconSkull, IconPencil } from '@tabler/icons-react';
 import { Outlet } from 'react-router-dom';
 
 export function Layout() {
@@ -33,6 +33,11 @@ export function Layout() {
           <NavLink
             label="Мои миры"
             leftSection={<IconWorld size={18} />}
+          />
+          <NavLink
+            label="Редактор"
+            href="/editor"
+            leftSection={<IconPencil size={18} />}
           />
         </Stack>
       </AppShell.Navbar>

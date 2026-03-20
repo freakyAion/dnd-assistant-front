@@ -1,0 +1,28 @@
+{
+  "response": {
+    "article": {
+      "title": "Воин",
+      "content": [
+        {
+          "type": "heading",
+          "level": 2,
+          "text": "Особенности класса"
+        },
+        {
+          "type": "paragraph",
+          "spans": [
+            { "type": "text", "text": "Воин — это " },
+            { "type": "italic", "text": "универсальный боец" },
+            { "type": "text", "text": ", способный сражаться любым оружием и в любых доспехах. Основная черта воина — " },
+            { "type": "colored", "text": "непревзойдённая стойкость", "color": "red" },
+            { "type": "text", "text": ". Подробнее о механиках читайте " },
+            { "type": "link", "text": "на этой странице", "href": "/books/classes", "external": false },
+            { "type": "text", "text": ", а об истории класса — " },
+            { "type": "link", "text": "здесь", "href": "https://dnd.wizards.com", "external": true },
+            { "type": "text", "text": "." }
+          ]
+        }
+      ]
+    }
+  }
+}
