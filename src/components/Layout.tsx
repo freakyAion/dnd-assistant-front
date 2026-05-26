@@ -8,6 +8,11 @@ import {
   IconSword,
   IconUsers,
   IconWorld,
+  IconUser,
+  IconUserPlus,
+  IconCompass,
+  IconPlus,
+  IconGlobe,
 } from '@tabler/icons-react';
 import { Outlet } from 'react-router-dom';
 import { AppShell, NavLink, Stack } from '@mantine/core';
@@ -28,10 +33,12 @@ export function Layout() {
             />
           )}
           <NavLink href="/" label="На главную" leftSection={<IconHome2 size={18} />} />
+          
           <NavLink label="Мои персонажи" leftSection={<IconUsers size={18} />}>
-            <NavLink href="/characters" label="Все персонажи" />
-            <NavLink href="/characters/new" label="Создать персонажа" />
+            <NavLink href="/characters" label="Все персонажи" leftSection={<IconUser size={16} />} />
+            <NavLink href="/characters/new" label="Создать нового" leftSection={<IconUserPlus size={16} />} />
           </NavLink>
+          
           <NavLink label="Книги" leftSection={<IconBooks size={18} />}>
             <NavLink href="/books/classes" label="Классы" leftSection={<IconSword size={16} />} />
             <NavLink
@@ -41,7 +48,13 @@ export function Layout() {
             />
             <NavLink href="/books/monsters" label="Монстры" leftSection={<IconSkull size={16} />} />
           </NavLink>
-          <NavLink label="Мои миры" leftSection={<IconWorld size={18} />} />
+          
+          <NavLink label="Миры" leftSection={<IconWorld size={18} />} >
+            <NavLink label="Мои" leftSection={<IconGlobe size={16} />} />
+            <NavLink label="Создать новый" leftSection={<IconPlus size={16} />} />
+            <NavLink label="Доступные" leftSection={<IconCompass size={16} />} />
+          </NavLink>
+          
           <NavLink label="Редактор" href="/editor" leftSection={<IconPencil size={18} />} />
         </Stack>
       </AppShell.Navbar>
