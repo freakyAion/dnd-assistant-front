@@ -1,9 +1,9 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Anchor, Button, Paper, PasswordInput, Stack, Text, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { login } from '../api/api';
 import { saveToken } from '../store/auth';
-import { useState } from 'react';
 
 export function LoginPage() {
   const navigate = useNavigate();
@@ -14,7 +14,7 @@ export function LoginPage() {
     initialValues: { email: '', password: '' },
     validate: {
       email: (val) => (/^\S+@\S+\.\S+$/.test(val) ? null : 'Введите корректный email'),
-      password: (val) => val.length < 6 ? 'Пароль должен быть не менее 6 символов' : null,
+      password: (val) => (val.length < 6 ? 'Пароль должен быть не менее 6 символов' : null),
     },
   });
 
@@ -37,8 +37,14 @@ export function LoginPage() {
       <Paper p="xl" withBorder w={360}>
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack gap="md">
-            <Title order={2} ta="center">Вход</Title>
-            {error && <Text c="red" size="sm">{error}</Text>}
+            <Title order={2} ta="center">
+              Вход
+            </Title>
+            {error && (
+              <Text c="red" size="sm">
+                {error}
+              </Text>
+            )}
             <TextInput
               label="Email"
               placeholder="Ваш email"
@@ -56,7 +62,9 @@ export function LoginPage() {
             </Button>
             <Text size="sm" ta="center">
               Нет аккаунта?{' '}
-              <Anchor component={Link} to="/register">Зарегистрироваться</Anchor>
+              <Anchor component={Link} to="/register">
+                Зарегистрироваться
+              </Anchor>
             </Text>
           </Stack>
         </form>

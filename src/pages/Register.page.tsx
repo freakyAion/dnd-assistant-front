@@ -1,8 +1,8 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Anchor, Button, Paper, PasswordInput, Stack, Text, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
 import { register } from '../api/api';
-import { useState } from 'react';
 
 export function RegisterPage() {
   const navigate = useNavigate();
@@ -15,7 +15,8 @@ export function RegisterPage() {
       name: (val) => {
         if (val.length < 3) return 'Имя должно быть не менее 3 символов';
         if (val.length > 255) return 'Имя не может быть длиннее 255 символов';
-        if (!/^[A-Za-z0-9_\- ]{3,255}$/.test(val)) return 'Имя может содержать только буквы, цифры, пробелы, _ и -';
+        if (!/^[A-Za-z0-9_\- ]{3,255}$/.test(val))
+          return 'Имя может содержать только буквы, цифры, пробелы, _ и -';
         return null;
       },
       email: (val) => (/^\S+@\S+\.\S+$/.test(val) ? null : 'Введите корректный email'),
@@ -50,8 +51,14 @@ export function RegisterPage() {
       <Paper p="xl" withBorder w={360}>
         <form onSubmit={form.onSubmit(handleSubmit)}>
           <Stack gap="md">
-            <Title order={2} ta="center">Регистрация</Title>
-            {error && <Text c="red" size="sm">{error}</Text>}
+            <Title order={2} ta="center">
+              Регистрация
+            </Title>
+            {error && (
+              <Text c="red" size="sm">
+                {error}
+              </Text>
+            )}
             <TextInput
               label="Имя"
               placeholder="Ваше имя"
@@ -75,7 +82,9 @@ export function RegisterPage() {
             </Button>
             <Text size="sm" ta="center">
               Уже есть аккаунт?{' '}
-              <Anchor component={Link} to="/login">Войти</Anchor>
+              <Anchor component={Link} to="/login">
+                Войти
+              </Anchor>
             </Text>
           </Stack>
         </form>
