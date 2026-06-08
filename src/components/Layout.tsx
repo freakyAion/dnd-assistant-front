@@ -10,6 +10,7 @@ import {
   IconSkull,
   IconSparkles,
   IconSword,
+  IconUser,
 } from '@tabler/icons-react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { AppShell, NavLink, Stack } from '@mantine/core';
@@ -80,6 +81,13 @@ export function Layout() {
                 leftSection={<IconBackpack size={16} />}
               />
             </NavLink>
+
+            <NavLink
+              onClick={() => navigate('/characters')}
+              active={location.pathname.startsWith('/characters')}
+              label="Персонажи"
+              leftSection={<IconUser size={18} />}
+            />
 
             {authenticated && (
               <NavLink

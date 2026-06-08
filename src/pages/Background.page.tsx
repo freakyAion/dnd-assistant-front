@@ -1,8 +1,21 @@
 import { useEffect, useState } from 'react';
-import { Title, Text, Card, Stack, SimpleGrid, Badge, Group, Button, Loader, Container, TextInput, Divider } from '@mantine/core';
-import { IconChevronLeft, IconSearch, IconBriefcase } from '@tabler/icons-react';
-import { getBackgrounds, Background } from '../api/api';
+import { IconBriefcase, IconChevronLeft, IconSearch } from '@tabler/icons-react';
+import {
+  Badge,
+  Button,
+  Card,
+  Container,
+  Divider,
+  Group,
+  Loader,
+  SimpleGrid,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+} from '@mantine/core';
 import { notifications } from '@mantine/notifications';
+import { Background, getBackgrounds } from '../api/api';
 
 export function BackgroundsPage() {
   const [backgrounds, setBackgrounds] = useState<Background[]>([]);
@@ -13,7 +26,13 @@ export function BackgroundsPage() {
   useEffect(() => {
     getBackgrounds()
       .then((res) => setBackgrounds(Array.isArray(res.data) ? res.data : []))
-      .catch(() => notifications.show({ title: 'Ошибка', message: 'Не удалось загрузить предыстории', color: 'red' }))
+      .catch(() =>
+        notifications.show({
+          title: 'Ошибка',
+          message: 'Не удалось загрузить предыстории',
+          color: 'red',
+        })
+      )
       .finally(() => setLoading(false));
   }, []);
 
@@ -36,24 +55,39 @@ export function BackgroundsPage() {
       <Container fluid p={0}>
         <Stack gap="lg">
           <Group>
-            <Button variant="subtle" leftSection={<IconChevronLeft size={16} />} onClick={() => setSelectedBackground(null)} p={0}>
+            <Button
+              variant="subtle"
+              leftSection={<IconChevronLeft size={16} />}
+              onClick={() => setSelectedBackground(null)}
+              p={0}
+            >
               Назад к предысториям
             </Button>
           </Group>
 
           <Stack gap="xs">
             <Title order={1}>{selectedBackground.name}</Title>
-            <Text size="lg" c="dimmed">{selectedBackground.description?.text}</Text>
+            <Text size="lg" c="dimmed">
+              {selectedBackground.description?.text}
+            </Text>
           </Stack>
 
           <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="md" mt="md">
             <Card withBorder padding="md">
-              <Text size="xs" c="dimmed" tt="uppercase" fw={700}>Бонусные навыки (Skills)</Text>
-              <Text fw={600} size="md" mt={4}>{selectedBackground.skillProficiencies || 'Отсутствуют'}</Text>
+              <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
+                Бонусные навыки (Skills)
+              </Text>
+              <Text fw={600} size="md" mt={4}>
+                {selectedBackground.skillProficiencies || 'Отсутствуют'}
+              </Text>
             </Card>
             <Card withBorder padding="md">
-              <Text size="xs" c="dimmed" tt="uppercase" fw={700}>Инструменты / Языки</Text>
-              <Text fw={600} size="md" mt={4}>{selectedBackground.languagesOrTools || 'Отсутствуют'}</Text>
+              <Text size="xs" c="dimmed" tt="uppercase" fw={700}>
+                Инструменты / Языки
+              </Text>
+              <Text fw={600} size="md" mt={4}>
+                {selectedBackground.languagesOrTools || 'Отсутствуют'}
+              </Text>
             </Card>
           </SimpleGrid>
 
@@ -62,13 +96,26 @@ export function BackgroundsPage() {
           <Stack gap="md">
             <Title order={2}>Умения предыстории</Title>
             {selectedBackground.features?.map((feature, idx) => (
-              <Card key={feature.id || idx} withBorder padding="lg" bg="var(--mantine-color-gray-light)" radius="md">
+              <Card
+                key={feature.id || idx}
+                withBorder
+                padding="lg"
+                bg="var(--mantine-color-gray-light)"
+                radius="md"
+              >
                 <Stack gap="xs">
                   <Group gap="xs">
-                    <IconBriefcase size={20} style={{ color: 'var(--mantine-color-blue-filled)' }} />
-                    <Text fw={700} size="lg">{feature.name}</Text>
+                    <IconBriefcase
+                      size={20}
+                      style={{ color: 'var(--mantine-color-blue-filled)' }}
+                    />
+                    <Text fw={700} size="lg">
+                      {feature.name}
+                    </Text>
                   </Group>
-                  <Text size="sm" style={{ lineHeight: 1.6 }}>{feature.description?.text}</Text>
+                  <Text size="sm" style={{ lineHeight: 1.6 }}>
+                    {feature.description?.text}
+                  </Text>
                 </Stack>
               </Card>
             ))}
@@ -90,21 +137,35 @@ export function BackgroundsPage() {
         </Stack>
 
         <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
-          <TextInput 
-            placeholder="Поиск предыстории..." 
-            leftSection={<IconSearch size={16} />} 
-            value={search} 
-            onChange={(e) => setSearch(e.currentTarget.value)} 
+          <TextInput
+            placeholder="Поиск предыстории..."
+            leftSection={<IconSearch size={16} />}
+            value={search}
+            onChange={(e) => setSearch(e.currentTarget.value)}
           />
         </SimpleGrid>
 
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
           {filteredBackgrounds.map((b) => (
-            <Card key={b.id} shadow="sm" padding="lg" radius="md" withBorder style={{ cursor: 'pointer' }} onClick={() => setSelectedBackground(b)}>
+            <Card
+              key={b.id}
+              shadow="sm"
+              padding="lg"
+              radius="md"
+              withBorder
+              style={{ cursor: 'pointer' }}
+              onClick={() => setSelectedBackground(b)}
+            >
               <Stack gap="xs">
                 <Title order={3}>{b.name}</Title>
-                {b.skillProficiencies && <Text size="xs" c="blue" fw={600}>Навыки: {b.skillProficiencies}</Text>}
-                <Text size="sm" c="dimmed" lineClamp={3}>{b.description?.text || 'Нажмите для просмотра особенностей...'}</Text>
+                {b.skillProficiencies && (
+                  <Text size="xs" c="blue" fw={600}>
+                    Навыки: {b.skillProficiencies}
+                  </Text>
+                )}
+                <Text size="sm" c="dimmed" lineClamp={3}>
+                  {b.description?.text || 'Нажмите для просмотра особенностей...'}
+                </Text>
               </Stack>
             </Card>
           ))}

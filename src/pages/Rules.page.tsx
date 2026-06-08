@@ -156,23 +156,24 @@ export function RulesPage() {
             value={search}
             onChange={(e) => setSearch(e.currentTarget.value)}
           />
-          
+
           <MultiSelect
             placeholder="Категории механик"
             clearable
             searchable
             data={uniqueCategories}
             // Defensively convert array input down to strict string elements to prevent internal crashes
-            value={Array.isArray(categoryFilters) 
-              ? categoryFilters.filter(val => typeof val === 'string').map(val => String(val)) 
-              : []
+            value={
+              Array.isArray(categoryFilters)
+                ? categoryFilters.filter((val) => typeof val === 'string').map((val) => String(val))
+                : []
             }
             // Strict sanitization of values received from change events
             onChange={(values) => {
               if (!values || !Array.isArray(values)) {
                 setCategoryFilters([]);
               } else {
-                setCategoryFilters(values.filter(val => typeof val === 'string'));
+                setCategoryFilters(values.filter((val) => typeof val === 'string'));
               }
             }}
           />
