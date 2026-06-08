@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { IconCheck } from '@tabler/icons-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Anchor, Button, Paper, PasswordInput, Stack, Text, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
 import { login } from '../api/api';
 import { saveToken } from '../store/auth';
 
@@ -14,7 +16,7 @@ export function LoginPage() {
     initialValues: { email: '', password: '' },
     validate: {
       email: (val) => (/^\S+@\S+\.\S+$/.test(val) ? null : 'Введите корректный email'),
-      password: (val) => (val.length < 6 ? 'Пароль должен быть не менее 6 символов' : null),
+      password: (val) => (val.length < 8 ? 'Пароль должен быть не менее 8 символов' : null),
     },
   });
 
@@ -24,9 +26,19 @@ export function LoginPage() {
     try {
       const res = await login(values);
       saveToken(res.data.accessToken);
+
+      // Success Notification
+      notifications.show({
+        title: 'Успешный вход',
+        message: `Добро пожаловать назад, ${res.data.name || ''}!`,
+        color: 'green',
+        icon: <IconCheck size={16} />,
+        autoClose: 3000,
+      });
+
       navigate('/');
-    } catch {
-      setError('Неверный email или пароль');
+    } catch (err: any) {
+      setError(err.response?.data?.message || 'Неверный email или пароль');
     } finally {
       setLoading(false);
     }
@@ -41,7 +53,7 @@ export function LoginPage() {
               Вход
             </Title>
             {error && (
-              <Text c="red" size="sm">
+              <Text c="red" size="sm" ta="center">
                 {error}
               </Text>
             )}

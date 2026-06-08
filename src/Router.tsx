@@ -1,33 +1,38 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
+// IMPORT TITLE FROM MANTINE CORE
+import { Title } from '@mantine/core';
 import { Layout } from './components/Layout';
-import { CharacterDetailPage } from './pages/CharacterDetails.page'; // Import the detail viewer
+import { ClassesPage } from './pages/Classes.page';
 import { EditorPage } from './pages/Editor.page';
 import { HomePage } from './pages/Home.page';
+import { ItemsPage } from './pages/Items.page';
 import { LoginPage } from './pages/Login.page';
-import { CharactersPage } from './pages/MyCharacters.page'; // Import your page
-
-import { NewCharacterPage } from './pages/NewCharacter.page';
 import { RegisterPage } from './pages/Register.page';
+import { RulesPage } from './pages/Rules.page';
+import { SpellsPage } from './pages/Spells.page';
+import { SpeciesPage } from './pages/Species.page';
+import { BackgroundsPage } from './pages/Background.page';
 
 const router = createBrowserRouter([
   {
     path: '/',
     element: <Layout />,
     children: [
+      { path: '/', element: <HomePage /> },
       { path: '/login', element: <LoginPage /> },
       { path: '/register', element: <RegisterPage /> },
-      { path: '/', element: <HomePage /> },
-
-      // Character Routes
-      { path: '/characters/me', element: <CharactersPage /> },
-      { path: '/characters/new', element: <NewCharacterPage /> },
-      { path: '/characters/:id', element: <CharacterDetailPage /> }, // Fixes the error page redirect
-      { path: '/characters/:id/edit', element: <div>Редактирование персонажа</div> },
-      { path: '/characters/new', element: <div>Создание персонажа</div> },
-
-      { path: '/books', element: <div>Книги</div> },
-      { path: '/worlds', element: <div>Мои миры</div> },
       { path: '/editor', element: <EditorPage /> },
+
+      // Reference Book Routes (Corrected with Title order properties)
+      { path: '/books/rules', element: <RulesPage /> },
+      { path: '/books/classes', element: <ClassesPage /> },
+      { path: '/books/species', element: <SpeciesPage /> },
+      { path: '/books/backgrounds', element: <BackgroundsPage /> },
+      { path: '/books/spells', element: <SpellsPage /> },
+      { path: '/books/items', element: <ItemsPage /> },
+
+      // Fallback
+      { path: '*', element: <Title order={3}>Страница не найдена</Title> },
     ],
   },
 ]);

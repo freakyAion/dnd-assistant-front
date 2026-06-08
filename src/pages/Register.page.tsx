@@ -1,7 +1,9 @@
 import { useState } from 'react';
+import { IconCheck } from '@tabler/icons-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Anchor, Button, Paper, PasswordInput, Stack, Text, TextInput, Title } from '@mantine/core';
 import { useForm } from '@mantine/form';
+import { notifications } from '@mantine/notifications';
 import { register } from '../api/api';
 
 export function RegisterPage() {
@@ -20,11 +22,7 @@ export function RegisterPage() {
         return null;
       },
       email: (val) => (/^\S+@\S+\.\S+$/.test(val) ? null : 'Введите корректный email'),
-      password: (val) => {
-        if (val.length < 6) return 'Пароль должен быть не менее 6 символов';
-        if (val.length > 100) return 'Пароль не может быть длиннее 100 символов';
-        return null;
-      },
+      password: (val) => (val.length < 8 ? 'Пароль должен быть не менее 8 символов' : null),
     },
   });
 
@@ -32,15 +30,21 @@ export function RegisterPage() {
     setLoading(true);
     setError('');
     try {
-      await register({ ...values, role: 0 });
+      await register(values);
+
+      // Success Notification
+      notifications.show({
+        title: 'Регистрация успешна',
+        message: 'Аккаунт создан! Теперь вы можете войти в систему.',
+        color: 'green',
+        icon: <IconCheck size={16} />,
+        autoClose: 4000,
+      });
+
       navigate('/login');
     } catch (err: any) {
-      const serverError = err.response?.data?.response;
-      if (serverError === 'Duplicate Entries') {
-        setError('Пользователь с таким email уже существует');
-      } else {
-        setError('Ошибка регистрации. Попробуйте снова.');
-      }
+      const serverMessage = err.response?.data?.message;
+      setError(serverMessage || 'Ошибка регистрации. Попробуйте снова.');
     } finally {
       setLoading(false);
     }
@@ -55,7 +59,7 @@ export function RegisterPage() {
               Регистрация
             </Title>
             {error && (
-              <Text c="red" size="sm">
+              <Text c="red" size="sm" ta="center">
                 {error}
               </Text>
             )}

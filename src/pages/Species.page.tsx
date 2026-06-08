@@ -1,100 +1,143 @@
-// src/pages/Species.page.tsx
-import { useState } from 'react';
-import { IconAdjustmentsHorizontal, IconSearch } from '@tabler/icons-react';
-import { Badge, Button, Card, Grid, Group, Stack, Text, TextInput, Title } from '@mantine/core';
+import { useEffect, useState } from 'react';
+import { Title, Text, Card, Stack, SimpleGrid, Badge, Group, Button, Loader, Container, TextInput, MultiSelect, Divider } from '@mantine/core';
+import { IconChevronLeft, IconSearch } from '@tabler/icons-react';
+import { getSpecies, Species } from '../api/api';
+import { notifications } from '@mantine/notifications';
 
-const MOCK_SPECIES = [
-  {
-    id: '1',
-    name: 'Гоблин',
-    size: 'Маленький',
-    speed: '30 фт.',
-    bonuses: '+2 ЛВК, +1 ТЕЛ',
-    tags: ['Монстровидный', 'PHB'],
-  },
-  {
-    id: '2',
-    name: 'Нага',
-    size: 'Средний',
-    speed: '30 фт., 30 фт. плавание',
-    bonuses: '+2 СИЛ, +1 ИНТ',
-    tags: ['Змеевидный', 'Amonkhet'],
-  },
-  {
-    id: '3',
-    name: 'Горгона',
-    size: 'Средний',
-    speed: '30 фт.',
-    bonuses: '+2 ХАР, +1 ТЕЛ',
-    tags: ['Монстровидный', 'Arcane Forge', 'Окаменение'],
-  },
-];
+// Helper function to map database size enum integers to human-readable names
+const formatSizeName = (size: string | number) => {
+  const mapping: Record<string | number, string> = {
+    0: 'Крошечный (Tiny)',
+    1: 'Маленький (Small)',
+    2: 'Средний (Medium)',
+    3: 'Большой (Large)',
+  };
+  return mapping[size] || String(size);
+};
 
 export function SpeciesPage() {
-  const [searchQuery, setSearchQuery] = useState('');
+  const [speciesList, setSpeciesList] = useState<Species[]>([]);
+  const [selectedSpecies, setSelectedSpecies] = useState<Species | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  const filteredSpecies = MOCK_SPECIES.filter((s) =>
-    s.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const [search, setSearch] = useState('');
+  const [sizeFilters, setSizeFilters] = useState<string[]>([]);
 
+  useEffect(() => {
+    getSpecies()
+      .then((res) => setSpeciesList(Array.isArray(res.data) ? res.data : []))
+      .catch(() => notifications.show({ title: 'Ошибка', message: 'Не удалось загрузить расы', color: 'red' }))
+      .finally(() => setLoading(false));
+  }, []);
+
+  const filteredSpecies = speciesList.filter((s) => {
+    if (!s || !s.name) return false;
+    const matchesSearch = s.name.toLowerCase().includes(search.toLowerCase());
+    const matchesSize = sizeFilters.length === 0 || sizeFilters.includes(String(s.size));
+    return matchesSearch && matchesSize;
+  });
+
+  const uniqueSizes = Array.from(new Set(speciesList.map((s) => s.size)))
+    .filter((size) => size !== undefined && size !== null)
+    .map((size) => ({
+      value: String(size),
+      label: formatSizeName(size),
+    }));
+
+  if (loading) {
+    return (
+      <Stack align="center" justify="center" h="50vh">
+        <Loader size="xl" />
+        <Text c="dimmed">Загрузка генеалогического древа рас...</Text>
+      </Stack>
+    );
+  }
+
+  // --- DETAILED INLINE VIEW ---
+  if (selectedSpecies) {
+    return (
+      <Container fluid p={0}>
+        <Stack gap="lg">
+          <Group>
+            <Button variant="subtle" leftSection={<IconChevronLeft size={16} />} onClick={() => setSelectedSpecies(null)} p={0}>
+              Назад к расам
+            </Button>
+          </Group>
+
+          <Group justify="space-between" align="center">
+            <Stack gap="xs">
+              <Title order={1}>{selectedSpecies.name}</Title>
+              <Text size="lg" c="dimmed">{selectedSpecies.description?.text || 'Описание отсутствует...'}</Text>
+            </Stack>
+            <Group gap="xs">
+              <Badge color="blue" size="xl">Размер: {formatSizeName(selectedSpecies.size)}</Badge>
+              <Badge color="green" size="xl">Скорость: {selectedSpecies.speed} фт.</Badge>
+            </Group>
+          </Group>
+
+          <Divider my="sm" />
+
+          <Stack gap="md">
+            <Title order={2}>Расовые особенности</Title>
+            {selectedSpecies.traits?.map((trait, idx) => (
+              <Card key={idx} withBorder padding="md" radius="sm">
+                <Stack gap="xs">
+                  <Text fw={700} size="lg" c="blue.8">{trait.name}</Text>
+                  <Text size="sm" style={{ lineHeight: 1.6 }}>{trait.description?.text}</Text>
+                </Stack>
+              </Card>
+            ))}
+            {(!selectedSpecies.traits || selectedSpecies.traits.length === 0) && (
+              <Text c="dimmed">У этой расы нет особых начальных черт.</Text>
+            )}
+          </Stack>
+        </Stack>
+      </Container>
+    );
+  }
+
+  // --- OVERVIEW GRID VIEW ---
   return (
-    <Stack gap="lg" p="md">
-      <div>
-        <Title order={2} mb="xs">
-          Расы и Виды
-        </Title>
-        <Text c="dimmed">Доступные виды существ для создания персонажа</Text>
-      </div>
+    <Container fluid p={0}>
+      <Stack gap="xl">
+        <Stack gap="xs">
+          <Title order={1}>Расы и происхождения</Title>
+          <Text c="dimmed">Выберите расу для вашего искателя приключений</Text>
+        </Stack>
 
-      <Group>
-        <TextInput
-          placeholder="Поиск вида..."
-          leftSection={<IconSearch size={16} />}
-          value={searchQuery}
-          onChange={(e) => setSearchQuery(e.currentTarget.value)}
-          style={{ flexGrow: 1 }}
-        />
-        <Button variant="default" leftSection={<IconAdjustmentsHorizontal size={16} />}>
-          Фильтры
-        </Button>
-      </Group>
+        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
+          <TextInput 
+            placeholder="Поиск расы..." 
+            leftSection={<IconSearch size={16} />} 
+            value={search} 
+            onChange={(e) => setSearch(e.currentTarget.value)} 
+          />
+          <MultiSelect
+            placeholder="Фильтр по размеру"
+            clearable
+            searchable
+            data={uniqueSizes}
+            value={Array.isArray(sizeFilters) ? sizeFilters.filter(v => typeof v === 'string').map(String) : []}
+            onChange={(values) => setSizeFilters(values ? values.filter(v => typeof v === 'string') : [])}
+          />
+        </SimpleGrid>
 
-      <Grid>
-        {filteredSpecies.map((species) => (
-          <Grid.Col key={species.id} span={{ base: 12, sm: 6, md: 4 }}>
-            <Card shadow="sm" padding="lg" radius="md" withBorder h="100%">
-              <Stack justify="space-between" h="100%">
-                <div>
-                  <Text fw={500} size="lg" mb="sm">
-                    {species.name}
-                  </Text>
-
-                  <Group gap="xs" mb="md">
-                    <Badge color="teal" variant="light">
-                      {species.size}
-                    </Badge>
-                    <Badge color="gray" variant="light">
-                      {species.speed}
-                    </Badge>
-                  </Group>
-
-                  <Text size="sm" mb="xs">
-                    <b>Увеличение хар-к:</b> {species.bonuses}
-                  </Text>
-                </div>
-
-                <Group gap="xs" mt="md">
-                  {species.tags.map((tag) => (
-                    <Badge key={tag} color="indigo" variant="dot" size="sm">
-                      {tag}
-                    </Badge>
-                  ))}
+        <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
+          {filteredSpecies.map((s) => (
+            <Card key={s.id} shadow="sm" padding="lg" radius="md" withBorder style={{ cursor: 'pointer' }} onClick={() => setSelectedSpecies(s)}>
+              <Stack gap="xs">
+                <Group justify="space-between">
+                  <Title order={3}>{s.name}</Title>
+                  <Badge variant="light">{formatSizeName(s.size)}</Badge>
                 </Group>
+                <Text size="sm" c="dimmed" lineClamp={3}>
+                  {s.description?.text || 'Нажмите для просмотра деталей и расовых особенностей...'}
+                </Text>
               </Stack>
             </Card>
-          </Grid.Col>
-        ))}
-      </Grid>
-    </Stack>
+          ))}
+        </SimpleGrid>
+      </Stack>
+    </Container>
   );
 }

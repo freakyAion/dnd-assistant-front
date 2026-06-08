@@ -1,8 +1,10 @@
 import '@mantine/core/styles.css';
+import '@mantine/notifications/styles.css';
 
 import { useEffect } from 'react';
-import { MantineProvider } from '@mantine/core';
-import { getServerStatus } from './api';
+import { MantineProvider, Notification } from '@mantine/core';
+import { Notifications } from '@mantine/notifications';
+import { getServerStatus } from './api/api';
 import { Router } from './Router';
 import { theme } from './theme';
 
@@ -15,6 +17,7 @@ export default function App() {
 
   return (
     <MantineProvider theme={theme}>
+      <Notifications position="top-right" zIndex={1000} />
       <Router />
     </MantineProvider>
   );
