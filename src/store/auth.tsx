@@ -22,3 +22,18 @@ export function isLoggedIn() {
     return false;
   }
 }
+
+export function getUserId(): string | null {
+  const token = getToken();
+  if (!token) return null;
+  try {
+    const decoded = jwtDecode<Record<string, any>>(token);
+    return (
+      decoded['http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier'] ||
+      decoded.sub ||
+      null
+    );
+  } catch {
+    return null;
+  }
+}

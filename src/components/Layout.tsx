@@ -2,6 +2,7 @@ import {
   IconArchive,
   IconBackpack,
   IconBooks,
+  IconGlobe, // <-- Add this icon
   IconHome2,
   IconLogin,
   IconLogout,
@@ -89,6 +90,14 @@ export function Layout() {
               leftSection={<IconUser size={18} />}
             />
 
+            {/* Added Worlds Navigation Link */}
+            <NavLink
+              onClick={() => navigate('/worlds')}
+              active={location.pathname.startsWith('/worlds')}
+              label="Миры"
+              leftSection={<IconGlobe size={18} />}
+            />
+
             {authenticated && (
               <NavLink
                 onClick={() => navigate('/editor')}
@@ -109,7 +118,6 @@ export function Layout() {
                   autoClose: 3000,
                 });
 
-                // 2. Clear state and redirect
                 removeToken();
                 navigate('/');
               }}

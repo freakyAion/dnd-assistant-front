@@ -14,6 +14,8 @@ import { RegisterPage } from './pages/Register.page';
 import { RulesPage } from './pages/Rules.page';
 import { SpeciesPage } from './pages/Species.page';
 import { SpellsPage } from './pages/Spells.page';
+import { WorldsPage } from './pages/Worlds.page';
+import { WorldSheetPage } from './pages/WorldSheet.page';
 
 const router = createBrowserRouter([
   {
@@ -36,7 +38,9 @@ const router = createBrowserRouter([
       { path: '/characters', element: <CharactersPage /> },
       { path: '/characters/:id', element: <CharacterSheetPage /> },
 
-      // Fallback
+      { path: '/worlds', element: <WorldsPage /> },
+      { path: '/worlds/:id', element: <WorldSheetPage /> },
+
       { path: '*', element: <Title order={3}>Страница не найдена</Title> },
     ],
   },

@@ -282,7 +282,7 @@ export const getMyCharacters = () =>
       speciesName: string;
       level: number;
       alignment: string;
-      isPublic: boolean; // <-- Add this property right here
+      isPublic: boolean;
     }>
   >('/characters');
 
@@ -311,11 +311,103 @@ export const toggleSpellPreparation = (id: string, spellId: string, isPrepared: 
 
 export const deleteCharacter = (id: string) => client.delete(`/characters/${id}`);
 
-export const getWizardClasses = () => 
+export const getWizardClasses = () =>
   client.get<Array<{ id: string; name: string }>>('/characters/classes');
 
-export const getWizardSpecies = () => 
+export const getWizardSpecies = () =>
   client.get<Array<{ id: string; name: string }>>('/characters/species');
 
-export const getWizardBackgrounds = () => 
+export const getWizardBackgrounds = () =>
   client.get<Array<{ id: string; name: string }>>('/characters/backgrounds');
+
+// --- LORE & WORLD BUILDING INTERFACES ---
+
+export interface RichTextContent {
+  blocks: Array<{
+    type: string;
+    text?: string;
+    damage?: string;
+    damageType?: string;
+    saveType?: string;
+    style?: {
+      bold?: boolean;
+      italic?: boolean;
+      color?: string;
+    };
+  }>;
+}
+
+export interface World {
+  id: string;
+  name: string;
+  ownerID: string;
+  description: RichTextContent;
+  isPublic: boolean;
+  campaigns?: any[];
+  npcs?: any[];
+  mapImageUrl?: string; 
+  locations?: Location[];
+  historicalEvents?: any[];
+}
+
+export interface WorldSummary {
+  id: string;
+  name: string;
+  isPublic: boolean;
+  campaignCount: number;
+}
+
+export interface CreateWorldDto {
+  name: string;
+  isPublic: boolean;
+  description?: RichTextContent;
+}
+
+export const getWorldDetails = (id: string) => client.get<World>(`/worlds/${id}`);
+
+export const createWorld = (dto: CreateWorldDto) => client.post<World>('/worlds', dto);
+
+export const getMyWorlds = () => client.get<WorldSummary[]>('/worlds');
+
+export const getJoinedWorlds = () => client.get<WorldSummary[]>('/worlds/joined');
+
+export interface Location {
+  id: string;
+  worldId: string;
+  name: string;
+  type: string;
+  description: RichTextContent;
+  parentLocationId?: string;
+  x?: number;
+  y?: number;
+}
+
+export interface CreateLocationDto {
+  name: string;
+  type: string;
+  description?: RichTextContent;
+  parentLocationId?: string;
+  x?: number;
+  y?: number;
+}
+
+// Add to the bottom of your API endpoints list:
+export const addLocation = (worldId: string, dto: CreateLocationDto) => 
+  client.post<Location>(`/worlds/${worldId}/locations`, dto);
+
+export const uploadImage = (file: File) => {
+  const formData = new FormData();
+  formData.append('file', file);
+  
+  const token = getToken(); // Get the token directly
+  
+  return client.post<{ url: string }>('/images', formData, {
+    headers: { 
+      'Content-Type': 'multipart/form-data',
+      'Authorization': token ? `Bearer ${token}` : '' 
+    },
+  });
+};
+
+export const updateWorldMap = (id: string, mapImageUrl: string) =>
+  client.put<World>(`/worlds/${id}/map`, { mapImageUrl });
