@@ -37,3 +37,27 @@ export function getUserId(): string | null {
     return null;
   }
 }
+
+export function IsAdmin(): boolean {
+  const token = localStorage.getItem('token');
+  if (!token) return false;
+
+  try {
+    const base64Url = token.split('.')[1];
+    const base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+    const payload = JSON.parse(window.atob(base64));
+
+    // Check short string property keys or fallback schema addresses
+    const roles =
+      payload['role'] ||
+      payload['roles'] ||
+      payload['http://schemas.microsoft.com/ws/2008/06/identity/claims/role'];
+
+    if (Array.isArray(roles)) {
+      return roles.map((r) => String(r).toLowerCase()).includes('admin');
+    }
+    return roles ? String(roles).toLowerCase() === 'admin' : false;
+  } catch (error) {
+    return false;
+  }
+}

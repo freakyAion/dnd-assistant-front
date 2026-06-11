@@ -1,9 +1,24 @@
-import { useState, useRef } from 'react';
-import { Badge, Button, Card, Group, Loader, Modal, SimpleGrid, Stack, Text, TextInput, Title, FileButton, Box, Tooltip } from '@mantine/core';
-import { useDisclosure } from '@mantine/hooks';
+import { useRef, useState } from 'react';
 import { IconMapPin, IconPlus, IconUpload } from '@tabler/icons-react';
+import {
+  Badge,
+  Box,
+  Button,
+  Card,
+  FileButton,
+  Group,
+  Loader,
+  Modal,
+  SimpleGrid,
+  Stack,
+  Text,
+  TextInput,
+  Title,
+  Tooltip,
+} from '@mantine/core';
+import { useDisclosure } from '@mantine/hooks';
 import { notifications } from '@mantine/notifications';
-import { addLocation, Location, uploadImage, updateWorldMap } from '../../api/api';
+import { addLocation, Location, updateWorldMap, uploadImage } from '../../api/api';
 
 interface LocationsModuleProps {
   worldId: string;
@@ -12,11 +27,16 @@ interface LocationsModuleProps {
   isOwner: boolean;
 }
 
-export function LocationsModule({ worldId, initialLocations, initialMapUrl, isOwner }: LocationsModuleProps) {
+export function LocationsModule({
+  worldId,
+  initialLocations,
+  initialMapUrl,
+  isOwner,
+}: LocationsModuleProps) {
   const [locations, setLocations] = useState<Location[]>(initialLocations);
   const [mapUrl, setMapUrl] = useState<string | undefined>(initialMapUrl);
   const [uploadingMap, setUploadingMap] = useState(false);
-  
+
   const [opened, { open, close }] = useDisclosure(false);
   const [name, setName] = useState('');
   const [type, setType] = useState('');
@@ -32,11 +52,10 @@ export function LocationsModule({ worldId, initialLocations, initialMapUrl, isOw
     try {
       const uploadRes = await uploadImage(file);
       const url = uploadRes.data.url;
-      
-      // Update the URL format so the frontend fetches it properly from the .NET host
+
       const fullUrl = `https://localhost:7178${url}`;
       await updateWorldMap(worldId, fullUrl);
-      
+
       setMapUrl(fullUrl);
       notifications.show({ message: 'Карта успешно загружена!', color: 'green' });
     } catch {
@@ -48,12 +67,11 @@ export function LocationsModule({ worldId, initialLocations, initialMapUrl, isOw
 
   const handleMapClick = (e: React.MouseEvent<HTMLImageElement>) => {
     if (!isOwner) return;
-    
-    // Calculate percentage relative to image dimensions for responsiveness
+
     const rect = e.currentTarget.getBoundingClientRect();
     const x = ((e.clientX - rect.left) / rect.width) * 100;
     const y = ((e.clientY - rect.top) / rect.height) * 100;
-    
+
     setCoordX(x);
     setCoordY(y);
     open();
@@ -78,7 +96,9 @@ export function LocationsModule({ worldId, initialLocations, initialMapUrl, isOw
         setLocations((prev) => [...prev, res.data]);
         closeModal();
       })
-      .catch(() => notifications.show({ title: 'Ошибка', message: 'Сбой при добавлении.', color: 'red' }))
+      .catch(() =>
+        notifications.show({ title: 'Ошибка', message: 'Сбой при добавлении.', color: 'red' })
+      )
       .finally(() => setSubmitting(false));
   };
 
@@ -98,7 +118,12 @@ export function LocationsModule({ worldId, initialLocations, initialMapUrl, isOw
           <Group>
             <FileButton onChange={handleMapUpload} accept="image/png,image/jpeg,image/webp">
               {(props) => (
-                <Button {...props} leftSection={<IconUpload size={16} />} variant="outline" loading={uploadingMap}>
+                <Button
+                  {...props}
+                  leftSection={<IconUpload size={16} />}
+                  variant="outline"
+                  loading={uploadingMap}
+                >
                   {mapUrl ? 'Обновить карту' : 'Загрузить карту'}
                 </Button>
               )}
@@ -113,31 +138,50 @@ export function LocationsModule({ worldId, initialLocations, initialMapUrl, isOw
       </Group>
 
       {mapUrl ? (
-        <Box style={{ position: 'relative', width: '100%', borderRadius: 8, overflow: 'hidden', border: '1px solid var(--mantine-color-default-border)' }}>
-          <img 
+        <Box
+          style={{
+            position: 'relative',
+            width: '100%',
+            borderRadius: 8,
+            overflow: 'hidden',
+            border: '1px solid var(--mantine-color-default-border)',
+          }}
+        >
+          <img
             ref={imageRef}
-            src={mapUrl} 
-            alt="Карта мира" 
-            style={{ display: 'block', width: '100%', height: 'auto', cursor: isOwner ? 'crosshair' : 'default' }} 
+            src={mapUrl}
+            alt="Карта мира"
+            style={{
+              display: 'block',
+              width: '100%',
+              height: 'auto',
+              cursor: isOwner ? 'crosshair' : 'default',
+            }}
             onClick={handleMapClick}
           />
-          {locations.map((loc) => (
-            loc.x != null && loc.y != null && (
-              <Tooltip key={loc.id} label={`${loc.name} (${loc.type})`} withArrow>
-                <div 
-                  style={{ 
-                    position: 'absolute', 
-                    left: `${loc.x}%`, 
-                    top: `${loc.y}%`, 
-                    transform: 'translate(-50%, -100%)',
-                    cursor: 'pointer'
-                  }}
-                >
-                  <IconMapPin size={32} color="var(--mantine-color-red-filled)" style={{ filter: 'drop-shadow(0px 2px 2px rgba(0,0,0,0.5))' }}/>
-                </div>
-              </Tooltip>
-            )
-          ))}
+          {locations.map(
+            (loc) =>
+              loc.x != null &&
+              loc.y != null && (
+                <Tooltip key={loc.id} label={`${loc.name} (${loc.type})`} withArrow>
+                  <div
+                    style={{
+                      position: 'absolute',
+                      left: `${loc.x}%`,
+                      top: `${loc.y}%`,
+                      transform: 'translate(-50%, -100%)',
+                      cursor: 'pointer',
+                    }}
+                  >
+                    <IconMapPin
+                      size={32}
+                      color="var(--mantine-color-red-filled)"
+                      style={{ filter: 'drop-shadow(0px 2px 2px rgba(0,0,0,0.5))' }}
+                    />
+                  </div>
+                </Tooltip>
+              )
+          )}
         </Box>
       ) : (
         <Card withBorder padding="xl" radius="md" style={{ textAlign: 'center' }}>
@@ -150,9 +194,14 @@ export function LocationsModule({ worldId, initialLocations, initialMapUrl, isOw
           {locations.map((loc) => (
             <Card key={loc.id} shadow="sm" padding="lg" radius="md" withBorder>
               <Group wrap="nowrap" align="flex-start">
-                <IconMapPin size={24} style={{ color: 'var(--mantine-color-red-filled)', marginTop: 4 }} />
+                <IconMapPin
+                  size={24}
+                  style={{ color: 'var(--mantine-color-red-filled)', marginTop: 4 }}
+                />
                 <Stack gap={4}>
-                  <Title order={4} lineClamp={1}>{loc.name}</Title>
+                  <Title order={4} lineClamp={1}>
+                    {loc.name}
+                  </Title>
                   <Badge variant="dot" color="gray" size="sm">
                     {loc.type}
                   </Badge>
@@ -166,10 +215,24 @@ export function LocationsModule({ worldId, initialLocations, initialMapUrl, isOw
       <Modal opened={opened} onClose={closeModal} title="Новая локация" radius="md">
         <Stack gap="md">
           {coordX != null && coordY != null && (
-            <Text size="sm" c="dimmed">Координаты: {coordX.toFixed(1)}%, {coordY.toFixed(1)}%</Text>
+            <Text size="sm" c="dimmed">
+              Координаты: {coordX.toFixed(1)}%, {coordY.toFixed(1)}%
+            </Text>
           )}
-          <TextInput label="Название" placeholder="например, Уотердип" required value={name} onChange={(e) => setName(e.currentTarget.value)} />
-          <TextInput label="Тип" placeholder="например, Город, Таверна, Лес" required value={type} onChange={(e) => setType(e.currentTarget.value)} />
+          <TextInput
+            label="Название"
+            placeholder="например, Уотердип"
+            required
+            value={name}
+            onChange={(e) => setName(e.currentTarget.value)}
+          />
+          <TextInput
+            label="Тип"
+            placeholder="например, Город, Таверна, Лес"
+            required
+            value={type}
+            onChange={(e) => setType(e.currentTarget.value)}
+          />
           <Button color="green" onClick={handleAddLocation} loading={submitting} mt="md">
             Сохранить точку
           </Button>

@@ -1,14 +1,14 @@
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-// IMPORT TITLE FROM MANTINE CORE
 import { Title } from '@mantine/core';
 import { Layout } from './components/Layout';
-import { BackgroundsPage } from './pages/Background.page';
+import { BackgroundsPage } from './pages/Backgrounds.page';
 import { CharactersPage } from './pages/Characters.page';
 import { CharacterSheetPage } from './pages/CharacterSheet.page';
 import { ClassesPage } from './pages/Classes.page';
 import { EditorPage } from './pages/Editor.page';
 import { HomePage } from './pages/Home.page';
 import { ItemsPage } from './pages/Items.page';
+import { JoinCampaignPage } from './pages/JoinCampaign.page';
 import { LoginPage } from './pages/Login.page';
 import { RegisterPage } from './pages/Register.page';
 import { RulesPage } from './pages/Rules.page';
@@ -27,7 +27,6 @@ const router = createBrowserRouter([
       { path: '/register', element: <RegisterPage /> },
       { path: '/editor', element: <EditorPage /> },
 
-      // Reference Book Routes (Corrected with Title order properties)
       { path: '/books/rules', element: <RulesPage /> },
       { path: '/books/classes', element: <ClassesPage /> },
       { path: '/books/species', element: <SpeciesPage /> },
@@ -40,6 +39,8 @@ const router = createBrowserRouter([
 
       { path: '/worlds', element: <WorldsPage /> },
       { path: '/worlds/:id', element: <WorldSheetPage /> },
+
+      { path: '/join/:code', element: <JoinCampaignPage /> },
 
       { path: '*', element: <Title order={3}>Страница не найдена</Title> },
     ],

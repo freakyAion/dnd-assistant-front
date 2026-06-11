@@ -1,10 +1,25 @@
 import axios from 'axios';
+import { notifications } from '@mantine/notifications';
 import { getToken } from '../store/auth';
 
 const client = axios.create({
   baseURL: 'https://localhost:7178/api',
   withCredentials: true,
 });
+
+client.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 403) {
+      notifications.show({
+        title: 'Доступ ограничен',
+        message: 'У вашего аккаунта нет прав администратора для выполнения этого действия.',
+        color: 'red',
+      });
+    }
+    return Promise.reject(error);
+  }
+);
 
 client.interceptors.request.use((config) => {
   const token = getToken();
@@ -30,25 +45,33 @@ export const register = (data: RegisterRequest) => client.post('/users/register'
 
 export const getServerStatus = () => client.get('/serverstatus');
 
+export enum RuleCategory {
+  CoreMechanics = 0,
+  Combat = 1,
+  Adventuring = 2,
+  Spellcasting = 3,
+}
+
 export interface Rule {
+  id?: string;
   title: string;
   slug: string;
-  category: 'General' | 'Combat' | 'Character' | 'Magic'; // Aligns with your backend RuleCategory enum strings
+  category: RuleCategory;
   content: {
-    blocks: Array<{
-      type: 'heading' | 'paragraph' | 'mechanics';
-      text?: string;
-      damage?: string;
-      damageType?: string;
-      saveType?: string;
-    }>;
+    blocks: any[];
   };
 }
 
-export const getRules = (category?: string) =>
+export const getRules = (category?: RuleCategory) =>
   client.get<Rule[]>('/rules', { params: { category } });
 
 export const getRuleBySlug = (slug: string) => client.get<Rule>(`/rules/${slug}`);
+
+export const createRule = (data: Omit<Rule, 'id'>) => client.post<Rule>('/rules', data);
+
+export const updateRule = (id: string, data: Omit<Rule, 'id'>) =>
+  client.put<Rule>(`/rules/${id}`, data);
+export const deleteRule = (id: string) => client.delete(`/rules/${id}`);
 
 export interface Spell {
   id: string;
@@ -76,23 +99,93 @@ export interface Spell {
   };
 }
 
-export interface Item {
+export enum ItemType {
+  Armor = 0,
+  Weapon = 1,
+  AdventuringGear = 2,
+  Tool = 3,
+  Consumable = 4,
+  Container = 5,
+  WondrousItem = 6,
+}
+
+export enum ItemRarity {
+  Mundane = 0,
+  Common = 1,
+  Uncommon = 2,
+  Rare = 3,
+  VeryRare = 4,
+  Legendary = 5,
+  Artifact = 6,
+}
+
+export enum DexBonusType {
+  None = 0,
+  Max2 = 1,
+  Full = 2,
+}
+
+export enum WeaponDamageType {
+  Bludgeoning = 0,
+  Piercing = 1,
+  Slashing = 2,
+  Acid = 3,
+  Cold = 4,
+  Fire = 5,
+  Force = 6,
+  Lightning = 7,
+  Necrotic = 8,
+  Poison = 9,
+  Psychic = 10,
+  Radiant = 11,
+  Thunder = 12,
+}
+
+export enum PropertyFlags {
+  None = 0,
+  Finesse = 1 << 0,
+  Heavy = 1 << 1,
+  Light = 1 << 2,
+  Reach = 1 << 3,
+  TwoHanded = 1 << 4,
+  Versatile = 1 << 5,
+  Thrown = 1 << 6,
+  Ammunition = 1 << 7,
+  Loading = 1 << 8,
+}
+
+export interface GameItem {
   id: string;
   name: string;
-  type: string;
-  rarity: string;
+  type: ItemType;
+  rarity: ItemRarity;
+  description: { blocks: any[] };
   weight: number;
   costValue: number;
-  costCurrency: string;
-  damageDiceQuantity?: number;
-  damageDiceSides?: number;
-  damageType?: string;
-  acValue?: number;
-  acDexBonusType?: string;
+  costCurrency: number; // Enums map directly down to integer indexes
+  requiresAttunement: boolean;
+  attunementPrerequisites?: string;
   strengthRequirement?: number;
   stealthDisadvantage: boolean;
-  description: { blocks: Array<{ type: string; text?: string }> };
+  acValue?: number;
+  acDexBonusType?: DexBonusType;
+  damageDiceQuantity?: number;
+  damageDiceSides?: number;
+  damageType?: WeaponDamageType;
+  properties: PropertyFlags;
+  containerCapacityWeight?: number;
+  isConsumable: boolean;
+  hasCharges: boolean;
+  maxCharges?: number;
+  chargeResetCondition?: string;
 }
+
+export const getItems = (type?: ItemType) => client.get<GameItem[]>('/items', { params: { type } });
+export const getItemById = (id: string) => client.get<GameItem>(`/items/${id}`);
+export const createItem = (data: Omit<GameItem, 'id'>) => client.post<GameItem>('/items', data);
+export const updateItem = (id: string, data: Omit<GameItem, 'id'>) =>
+  client.put<GameItem>(`/items/${id}`, data);
+export const deleteItem = (id: string) => client.delete(`/items/${id}`);
 
 export interface ClassFeature {
   name: string;
@@ -116,37 +209,77 @@ export interface ClassData {
   spells: Spell[];
 }
 
-export const getSpells = () => client.get<Spell[]>('/spells');
-export const getItems = () => client.get<Item[]>('/items');
 export const getClasses = () => client.get<ClassData[]>('/classes');
 export const getClassById = (id: string) => client.get<ClassData>(`/classes/${id}`);
+
+export const createClass = (data: Omit<ClassData, 'id' | 'progressions' | 'spells'>) =>
+  client.post<ClassData>('/classes', data);
+
+export const updateClass = (id: string, data: Omit<ClassData, 'id' | 'progressions' | 'spells'>) =>
+  client.put<ClassData>(`/classes/${id}`, data);
+
+export const deleteClass = (id: string) => client.delete(`/classes/${id}`);
+
+export const getSpells = () => client.get<Spell[]>('/spells');
+
+export const createSpell = (data: Omit<Spell, 'id'>) => client.post<Spell>('/spells', data);
+
+export const updateSpell = (id: string, data: Omit<Spell, 'id'>) =>
+  client.put<Spell>(`/spells/${id}`, data);
+
+export const deleteSpell = (id: string) => client.delete(`/spells/${id}`);
+
+export enum CreatureSize {
+  Tiny = 0,
+  Small = 1,
+  Medium = 2,
+  Large = 3,
+}
+
+export interface SpeciesTrait {
+  id?: string;
+  name: string;
+  description: { blocks?: any[]; text?: string };
+}
 
 export interface Species {
   id: string;
   name: string;
-  size: string;
-  speed: number;
-  description: { text: string };
-  traits: Array<{ name: string; description: { text: string } }>;
+  size: CreatureSize;
+  baseSpeed: number;
+  description: { blocks?: any[]; text?: string };
+  traits: SpeciesTrait[];
 }
 
 export interface BackgroundFeature {
   id: string;
   name: string;
-  description: { text: string };
+  description: { blocks?: any[]; text?: string };
 }
 
 export interface Background {
   id: string;
   name: string;
-  description: { text: string };
-  skillProficiencies: string;
-  languagesOrTools?: string;
+  description: { blocks?: any[]; text?: string };
+  skillProficiencies: number[]; // Array of skill enum flags or indices
   features: BackgroundFeature[];
 }
 
 export const getSpecies = () => client.get<Species[]>('/characteroptions/species');
 export const getBackgrounds = () => client.get<Background[]>('/characteroptions/backgrounds');
+
+export const createSpecies = (data: Omit<Species, 'id' | 'traits'>) =>
+  client.post<Species>('/characteroptions/species', data);
+export const updateSpecies = (id: string, data: Omit<Species, 'id' | 'traits'>) =>
+  client.put<Species>(`/characteroptions/species/${id}`, data);
+export const deleteSpecies = (id: string) => client.delete(`/characteroptions/species/${id}`);
+
+export const createBackground = (data: Omit<Background, 'id' | 'features'>) =>
+  client.post<Background>('/characteroptions/backgrounds', data);
+export const updateBackground = (id: string, data: Omit<Background, 'id' | 'features'>) =>
+  client.put<Background>(`/characteroptions/backgrounds/${id}`, data);
+export const deleteBackground = (id: string) =>
+  client.delete(`/characteroptions/backgrounds/${id}`);
 
 export enum Skill {
   Acrobatics = 0,
@@ -173,7 +306,7 @@ export interface CharacterItem {
   id: string;
   characterId: string;
   itemId: string;
-  item: Item;
+  item: GameItem;
   quantity: number;
   isEquipped: boolean;
   isAttuned: boolean;
@@ -190,14 +323,14 @@ export interface CharacterSpell {
 
 export interface Character {
   id: string;
-  userId: string;
+  userID: string; // Fixed casing token
   isPublic: boolean;
   name: string;
-  speciesId: string;
+  speciesID: string; // Fixed casing token
   species: Species;
-  backgroundId: string;
+  backgroundID: string; // Fixed casing token
   background: Background;
-  classId: string;
+  classID: string; // Fixed casing token
   class: ClassData;
   level: number;
   experiencePoints: number;
@@ -221,9 +354,9 @@ export interface Character {
   deathSaveSuccesses: number;
   deathSaveFailures: number;
   currentSpeedOverride: number;
-  activeConditions: string[];
+  activeConditions: any;
 
-  customSkillProficiencies: Skill[];
+  customSkillProficiencies: number[];
   expendedSpellSlots: number[];
   inventory: CharacterItem[];
   spells: CharacterSpell[];
@@ -231,9 +364,9 @@ export interface Character {
 
 export interface CreateCharacterDto {
   name: string;
-  speciesId: string;
-  backgroundId: string;
-  classId: string;
+  speciesID: string;
+  backgroundID: string;
+  classID: string;
   alignment: string;
   biography: string;
   age: string;
@@ -265,12 +398,29 @@ export interface UpdateVitalsDto {
   deathSaveSuccesses: number;
   deathSaveFailures: number;
 }
-
 export interface UpdateInventoryDto {
-  itemId: string;
+  itemID: string;
   quantity: number;
   isEquipped: boolean;
   isAttuned: boolean;
+}
+
+// Added the core stats transfer schema payload contract matching your new endpoint
+export interface UpdateCoreStatsDto {
+  name: string;
+  speciesID: string;
+  backgroundID: string;
+  classID: string;
+  level: number;
+  experiencePoints: number;
+  strength: number;
+  dexterity: number;
+  constitution: number;
+  intelligence: number;
+  wisdom: number;
+  charisma: number;
+  currentSpeedOverride: number;
+  customSkillProficiencies: number[];
 }
 
 export const getMyCharacters = () =>
@@ -300,14 +450,33 @@ export const updateCharacterBio = (id: string, dto: UpdateBioDto) =>
 export const updateCharacterVitals = (id: string, dto: UpdateVitalsDto) =>
   client.put(`/characters/${id}/vitals`, dto);
 
-export const updateCharacterInventory = (id: string, dto: UpdateInventoryDto) =>
-  client.put(`/characters/${id}/inventory`, dto);
+export const updateCharacterInventory = (id: string, dto: UpdateInventoryDto) => {
+  const token = localStorage.getItem('token');
+
+  return client.put(
+    `/characters/${id}/inventory`,
+    {
+      ItemID: dto.itemID,
+      Quantity: dto.quantity,
+      IsEquipped: dto.isEquipped,
+      IsAttuned: dto.isAttuned,
+    },
+    {
+      headers: {
+        Authorization: token ? `Bearer ${token}` : '',
+      },
+    }
+  );
+};
 
 export const updateCharacterSpellSlots = (id: string, expendedSpellSlots: number[]) =>
   client.put(`/characters/${id}/spell-slots`, { expendedSpellSlots });
 
-export const toggleSpellPreparation = (id: string, spellId: string, isPrepared: boolean) =>
-  client.put(`/characters/${id}/spells/preparation`, { spellId, isPrepared });
+export const toggleSpellPreparation = (id: string, spellID: string, isPrepared: boolean) =>
+  client.put(`/characters/${id}/spells/preparation`, { spellID, isPrepared });
+
+export const updateCharacterCoreStats = (id: string, dto: UpdateCoreStatsDto) =>
+  client.put(`/characters/${id}/core-stats`, dto);
 
 export const deleteCharacter = (id: string) => client.delete(`/characters/${id}`);
 
@@ -319,8 +488,6 @@ export const getWizardSpecies = () =>
 
 export const getWizardBackgrounds = () =>
   client.get<Array<{ id: string; name: string }>>('/characters/backgrounds');
-
-// --- LORE & WORLD BUILDING INTERFACES ---
 
 export interface RichTextContent {
   blocks: Array<{
@@ -345,7 +512,7 @@ export interface World {
   isPublic: boolean;
   campaigns?: any[];
   npcs?: any[];
-  mapImageUrl?: string; 
+  mapImageUrl?: string;
   locations?: Location[];
   historicalEvents?: any[];
 }
@@ -391,23 +558,103 @@ export interface CreateLocationDto {
   y?: number;
 }
 
-// Add to the bottom of your API endpoints list:
-export const addLocation = (worldId: string, dto: CreateLocationDto) => 
+export const addLocation = (worldId: string, dto: CreateLocationDto) =>
   client.post<Location>(`/worlds/${worldId}/locations`, dto);
 
 export const uploadImage = (file: File) => {
   const formData = new FormData();
   formData.append('file', file);
-  
+
   const token = getToken(); // Get the token directly
-  
+
   return client.post<{ url: string }>('/images', formData, {
-    headers: { 
+    headers: {
       'Content-Type': 'multipart/form-data',
-      'Authorization': token ? `Bearer ${token}` : '' 
+      Authorization: token ? `Bearer ${token}` : '',
     },
   });
 };
 
 export const updateWorldMap = (id: string, mapImageUrl: string) =>
   client.put<World>(`/worlds/${id}/map`, { mapImageUrl });
+
+export interface Npc {
+  id: string;
+  worldId: string;
+  name: string;
+  race: string;
+  occupation: string;
+  alignment: string;
+  description: RichTextContent;
+  isSecret: boolean;
+}
+
+export interface CreateNpcDto {
+  name: string;
+  race: string;
+  occupation: string;
+  alignment: string;
+  description?: RichTextContent;
+  isSecret: boolean;
+}
+
+export const addNpc = (worldId: string, dto: CreateNpcDto) =>
+  client.post<Npc>(`/worlds/${worldId}/npcs`, dto);
+
+export const updateNpc = (worldId: string, npcId: string, dto: CreateNpcDto) =>
+  client.put<Npc>(`/worlds/${worldId}/npcs/${npcId}`, dto);
+
+export const updateWorldDescription = (id: string, description: RichTextContent) =>
+  client.put(`/worlds/${id}/description`, { description });
+
+export interface HistoryEvent {
+  id: string;
+  name: string;
+  dateOrEra: string;
+  description: {
+    blocks: any[];
+  };
+}
+
+export const addHistoryEvent = (
+  worldId: string,
+  data: { name: string; dateOrEra: string; description?: any }
+) => client.post(`/worlds/${worldId}/history`, data);
+
+export const deleteHistoryEvent = (eventId: string) => client.delete(`/worlds/history/${eventId}`);
+
+export const updateHistoryEvent = (
+  eventId: string,
+  data: { name: string; dateOrEra: string; description?: any }
+) => client.put(`/worlds/history/${eventId}`, data);
+
+export interface Campaign {
+  id: string;
+  name: string;
+  worldID: string;
+  dungeonMasterID: string;
+  inviteCode: string;
+  notes: string;
+  characters: { id: string; name: string }[];
+  sessions: Session[];
+}
+
+export interface Session {
+  id: string;
+  name: string;
+  campaignID: string;
+  sessionNumber: number;
+  scheduledAt: string;
+  summary: string;
+}
+
+export const getCampaigns = (worldId: string) =>
+  client.get<Campaign[]>(`/campaigns/world/${worldId}`);
+export const createCampaign = (data: { name: string; worldId: string }) =>
+  client.post<Campaign>('/campaigns', data);
+export const getInviteDetails = (code: string) =>
+  client.get<{ id: string; name: string; worldName: string }>(`/campaigns/invite/${code}`);
+export const joinCampaign = (code: string, characterId: string) =>
+  client.post(`/campaigns/invite/${code}/join`, { characterId });
+export const createSession = (campaignId: string, data: { name: string; scheduledAt: Date }) =>
+  client.post<Session>(`/campaigns/${campaignId}/sessions`, data);

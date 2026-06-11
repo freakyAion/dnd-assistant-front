@@ -1,56 +1,91 @@
 import { useEffect, useState } from 'react';
 import {
-  IconBook,
-  IconChevronLeft,
-  IconHeart,
-  IconList,
+  IconCheck,
+  IconEdit,
+  IconEye,
+  IconPlus,
   IconSearch,
-  IconSword,
+  IconShield,
+  IconTrash,
+  IconX,
 } from '@tabler/icons-react';
 import {
+  ActionIcon,
   Badge,
+  Box,
   Button,
   Card,
+  Checkbox,
   Container,
+  Grid,
   Group,
   Loader,
-  MultiSelect,
+  Modal,
+  NumberInput,
+  Paper,
   SimpleGrid,
   Stack,
   Table,
-  Tabs,
   Text,
   TextInput,
   Title,
 } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
-import { ClassData, getClassById, getClasses } from '../api/api';
+import { ClassData, createClass, deleteClass, getClasses, updateClass } from '../api/api';
+import { ArticleEditor } from '../components/ArticleEditor/ArticleEditor';
+import { ArticleRenderer, Block } from '../components/ArticleRenderer/ArticleRenderer';
+import { IsAdmin } from '../store/auth';
 
-const formatSchoolName = (school: string | number) => {
-  const mapping: Record<string | number, string> = {
-    0: 'Ограждение (Abjuration)',
-    1: 'Вызов (Conjuration)',
-    2: 'Прорицание (Divination)',
-    3: 'Очарование (Enchantment)',
-    4: 'Воплощение (Evocation)',
-    5: 'Иллюзия (Illusion)',
-    6: 'Некромантия (Necromancy)',
-    7: 'Преобразование (Transmutation)',
-  };
-  return mapping[school] || String(school);
+const SAVING_THROWS = [
+  { value: 1 << 0, label: 'Сила' },
+  { value: 1 << 1, label: 'Ловкость' },
+  { value: 1 << 2, label: 'Телосложение' },
+  { value: 1 << 3, label: 'Интеллект' },
+  { value: 1 << 4, label: 'Мудрость' },
+  { value: 1 << 5, label: 'Харизма' },
+];
+
+const formatSavingThrows = (mask: number) => {
+  const active = SAVING_THROWS.filter((item) => (mask & item.value) !== 0).map(
+    (item) => item.label.split(' ')[0]
+  );
+  return active.length > 0 ? active.join(', ') : 'Нет';
+};
+
+// Helper to safely extract block arrays out of your flat backend string text field
+const parseDescriptionBlocks = (textString: string): Block[] => {
+  if (!textString) return [];
+  try {
+    // If it's stored as serialized JSON array blocks from the editor, extract it
+    if (textString.trim().startsWith('[') || textString.trim().startsWith('{')) {
+      const parsed = JSON.parse(textString);
+      return Array.isArray(parsed) ? parsed : parsed.blocks || [];
+    }
+  } catch {
+    // Fallback: If it's legacy raw text data, wrap it inside a safe paragraph block format
+  }
+  return [{ type: 'paragraph', text: textString }];
 };
 
 export function ClassesPage() {
   const [classes, setClasses] = useState<ClassData[]>([]);
-  const [selectedClass, setSelectedClass] = useState<ClassData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [detailLoading, setDetailLoading] = useState(false);
-
   const [search, setSearch] = useState('');
-  const [hitDiceFilters, setHitDiceFilters] = useState<string[]>([]);
-  const [activeTab, setActiveTab] = useState<string | null>('progression');
 
-  useEffect(() => {
+  const [adminMode, setAdminMode] = useState(false);
+  const [selectedClass, setSelectedClass] = useState<ClassData | null>(null);
+
+  const [editorOpened, setEditorOpened] = useState(false);
+  const [editingClassId, setEditingClassId] = useState<string | null>(null);
+  const [submitting, setSubmitting] = useState(false);
+
+  const [editName, setEditName] = useState('');
+  const [editHitDieSides, setEditHitDieSides] = useState<number>(8);
+  const [editSavesMask, setEditSavesMask] = useState<number>(0);
+  const [editBlocks, setEditBlocks] = useState<Block[]>([]);
+
+  const fetchClassesList = () => {
+    setLoading(true);
     getClasses()
       .then((res) => setClasses(res.data))
       .catch(() =>
@@ -61,228 +96,248 @@ export function ClassesPage() {
         })
       )
       .finally(() => setLoading(false));
-  }, []);
-
-  const handleSelectClass = (id: string) => {
-    setDetailLoading(true);
-    getClassById(id)
-      .then((res) => {
-        setSelectedClass(res.data);
-        setActiveTab('progression');
-      })
-      .catch(() =>
-        notifications.show({
-          title: 'Ошибка',
-          message: 'Не удалось загрузить детали класса',
-          color: 'red',
-        })
-      )
-      .finally(() => setDetailLoading(false));
   };
 
-  const filteredClasses = classes.filter((c) => {
-    const matchesSearch = c.name.toLowerCase().includes(search.toLowerCase());
-    const matchesHitDice =
-      hitDiceFilters.length === 0 || hitDiceFilters.includes(c.hitDieSides.toString());
-    return matchesSearch && matchesHitDice;
-  });
+  useEffect(() => {
+    fetchClassesList();
+  }, []);
 
-  const uniqueHitDiceOptions = Array.from(new Set(classes.map((c) => c.hitDieSides)))
-    .sort((a, b) => a - b)
-    .map((sides) => ({
-      value: sides.toString(),
-      label: `d${sides}`,
-    }));
+  useEffect(() => {
+    setAdminMode(IsAdmin());
+  }, [classes, selectedClass]);
 
-  const hasSpells = selectedClass?.progressions?.some(
-    (p) => p.spellSlots && Object.keys(p.spellSlots).length > 0
+  const openEditor = (charClass: ClassData | null = null) => {
+    if (charClass) {
+      setEditingClassId(charClass.id);
+      setEditName(charClass.name);
+      setEditHitDieSides(charClass.hitDieSides);
+      setEditSavesMask(charClass.savingThrows);
+      setEditBlocks(parseDescriptionBlocks(charClass.description?.text || ''));
+    } else {
+      setEditingClassId(null);
+      setEditName('');
+      setEditHitDieSides(8);
+      setEditSavesMask(0);
+      setEditBlocks([]);
+    }
+    setEditorOpened(true);
+  };
+
+  const handleToggleSaveFlag = (flagValue: number, checked: boolean) => {
+    if (checked) {
+      setEditSavesMask((prev) => prev | flagValue);
+    } else {
+      setEditSavesMask((prev) => prev & ~flagValue);
+    }
+  };
+
+  const handleSaveClass = async () => {
+    if (!editName.trim()) {
+      notifications.show({ title: 'Ошибка', message: 'Введите имя класса', color: 'red' });
+      return;
+    }
+
+    setSubmitting(true);
+
+    // We stringify the rich blocks array into your flat text field to save schema changes
+    const payload: Omit<ClassData, 'id' | 'progressions' | 'spells'> = {
+      name: editName,
+      hitDieSides: editHitDieSides,
+      savingThrows: editSavesMask,
+      description: { text: JSON.stringify(editBlocks) },
+    };
+
+    try {
+      if (editingClassId) {
+        await updateClass(editingClassId, payload);
+        notifications.show({
+          title: 'Успех',
+          message: 'Свойства класса успешно изменены',
+          color: 'green',
+        });
+      } else {
+        await createClass(payload);
+        notifications.show({
+          title: 'Успех',
+          message: 'Класс занесен в библиотечные архивы',
+          color: 'green',
+        });
+      }
+      setEditorOpened(false);
+      setSelectedClass(null);
+      fetchClassesList();
+    } catch {
+      notifications.show({ title: 'Ошибка', message: 'Не удалось сохранить класс', color: 'red' });
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const handleDeleteClass = async (id: string, event?: React.MouseEvent) => {
+    if (event) event.stopPropagation();
+    if (!window.confirm('Вы уверены, что хотите окончательно стереть этот класс?')) return;
+
+    try {
+      await deleteClass(id);
+      notifications.show({
+        title: 'Удалено',
+        message: 'Класс удален из справочника',
+        color: 'gray',
+      });
+      setSelectedClass(null);
+      fetchClassesList();
+    } catch {
+      notifications.show({
+        title: 'Ошибка',
+        message: 'Не удалось удалить выбранный класс',
+        color: 'red',
+      });
+    }
+  };
+
+  const filteredClasses = classes.filter((c) =>
+    c.name.toLowerCase().includes(search.toLowerCase())
   );
 
-  const maxSpellLevel =
-    selectedClass?.progressions?.reduce((max, p) => {
-      if (!p.spellSlots) return max;
-      const levels = Object.keys(p.spellSlots).map(Number);
-      return Math.max(max, ...levels, 0);
-    }, 0) || 0;
-
-  if (loading || detailLoading) {
+  if (loading) {
     return (
       <Stack align="center" justify="center" h="50vh">
         <Loader size="xl" />
-        <Text c="dimmed">Сборка конфигураций классов...</Text>
+        <Text c="dimmed">Извлечение архивных записей о героях...</Text>
       </Stack>
     );
   }
 
-  // --- DETAILED INLINE VIEW ---
   if (selectedClass) {
     return (
       <Container fluid p={0}>
         <Stack gap="lg">
-          <Group>
+          <Group justify="space-between">
             <Button
               variant="subtle"
-              leftSection={<IconChevronLeft size={16} />}
+              leftSection={<IconX size={16} />}
               onClick={() => setSelectedClass(null)}
               p={0}
+              color="gray"
             >
-              Назад к классам
+              Назад к списку классов
             </Button>
-          </Group>
-
-          <Group justify="space-between" align="center">
-            {/* Target gap fixed to xs */}
-            <Stack gap="xs">
-              <Title order={1}>{selectedClass.name}</Title>
-              <Text size="lg" c="dimmed">
-                {selectedClass.description?.text}
-              </Text>
-            </Stack>
             <Group gap="xs">
-              <Badge size="xl" variant="light" leftSection={<IconHeart size={14} />}>
-                d{selectedClass.hitDieSides} Хит-дайс
+              {adminMode && (
+                <Group gap={4} mr="xs">
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    leftSection={<IconEdit size={14} />}
+                    onClick={() => openEditor(selectedClass)}
+                  >
+                    Редактировать
+                  </Button>
+                  <Button
+                    size="xs"
+                    variant="outline"
+                    color="red"
+                    leftSection={<IconTrash size={14} />}
+                    onClick={() => handleDeleteClass(selectedClass.id)}
+                  >
+                    Удалить
+                  </Button>
+                </Group>
+              )}
+              <Badge color="red" size="lg">
+                Кость хитов: d{selectedClass.hitDieSides}
+              </Badge>
+              <Badge color="blue" size="lg">
+                Спасброски: {formatSavingThrows(selectedClass.savingThrows)}
               </Badge>
             </Group>
           </Group>
 
-          <Tabs value={activeTab} onChange={setActiveTab} variant="outline" mt="md">
-            <Tabs.List>
-              <Tabs.Tab value="progression" leftSection={<IconList size={16} />}>
-                Развитие класса
-              </Tabs.Tab>
-              {selectedClass.spells && selectedClass.spells.length > 0 && (
-                <Tabs.Tab value="spells" leftSection={<IconBook size={16} />}>
-                  Заклинания класса
-                </Tabs.Tab>
-              )}
-            </Tabs.List>
+          <Title order={1}>{selectedClass.name}</Title>
 
-            <Tabs.Panel value="progression" pt="md">
-              <Table striped withTableBorder withColumnBorders>
-                <Table.Thead>
-                  <Table.Tr>
-                    <Table.Th style={{ width: 80 }} ta="center">
-                      Уровень
-                    </Table.Th>
-                    <Table.Th style={{ width: 120 }} ta="center">
-                      Бонус мастерства
-                    </Table.Th>
-                    <Table.Th>Умения класса</Table.Th>
-                    {hasSpells &&
-                      Array.from({ length: maxSpellLevel }, (_, i) => i + 1).map((lvl) => (
-                        <Table.Th key={lvl} style={{ width: 60 }} ta="center">
-                          {lvl} круг
-                        </Table.Th>
-                      ))}
-                  </Table.Tr>
-                </Table.Thead>
-                <Table.Tbody>
-                  {selectedClass.progressions?.map((prog) => (
-                    <Table.Tr key={prog.level}>
-                      <Table.Td fw={700} ta="center">
-                        {prog.level}
-                      </Table.Td>
-                      <Table.Td ta="center">+{prog.proficiencyBonus}</Table.Td>
-                      <Table.Td>
-                        <Stack gap="xs">
-                          {prog.classFeatures?.map((f, i) => (
-                            <div key={i}>
-                              <Text fw={600} size="sm">
-                                {f.name}
-                              </Text>
-                              {f.description?.text && (
-                                <Text size="xs" c="dimmed">
-                                  {f.description.text}
-                                </Text>
-                              )}
-                            </div>
-                          ))}
-                          {(!prog.classFeatures || prog.classFeatures.length === 0) && (
-                            <Text size="sm" c="dimmed">
-                              —
+          <Box mt="xs">
+            <ArticleRenderer
+              article={{
+                title: '',
+                content: parseDescriptionBlocks(selectedClass.description?.text || ''),
+              }}
+            />
+          </Box>
+
+          {/* Progressions Map Dashboard */}
+          {selectedClass.progressions && selectedClass.progressions.length > 0 && (
+            <Box mt="xl">
+              <Title order={3} mb="md">
+                Таблица развития класса
+              </Title>
+              <Paper withBorder radius="md" style={{ overflow: 'hidden' }}>
+                <Table striped highlightOnHover verticalSpacing="xs">
+                  <Table.Thead bg="var(--mantine-color-gray-light)">
+                    <Table.Tr>
+                      <Table.Th style={{ width: '80px' }}>Уровень</Table.Th>
+                      <Table.Th style={{ width: '150px' }}>Бонус мастерства</Table.Th>
+                      <Table.Th>Умения класса</Table.Th>
+                    </Table.Tr>
+                  </Table.Thead>
+                  <Table.Tbody>
+                    {selectedClass.progressions.map((prog) => (
+                      <Table.Tr key={prog.level}>
+                        <Table.Td fw={700}>{prog.level}</Table.Td>
+                        <Table.Td>+{prog.proficiencyBonus}</Table.Td>
+                        <Table.Td>
+                          {prog.classFeatures && prog.classFeatures.length > 0 ? (
+                            <Group gap="xs">
+                              {prog.classFeatures.map((feat, fIdx) => (
+                                <Badge
+                                  key={fIdx}
+                                  variant="outline"
+                                  color="gray"
+                                  title={feat.description?.text}
+                                >
+                                  {feat.name}
+                                </Badge>
+                              ))}
+                            </Group>
+                          ) : (
+                            <Text size="xs" c="dimmed" fs="italic">
+                              Выдающихся умений нет
                             </Text>
                           )}
-                        </Stack>
-                      </Table.Td>
-                      {hasSpells &&
-                        Array.from({ length: maxSpellLevel }, (_, i) => i + 1).map((lvl) => {
-                          const slots = prog.spellSlots?.[lvl] || 0;
-                          return (
-                            <Table.Td
-                              key={lvl}
-                              ta="center"
-                              fw={slots > 0 ? 600 : 400}
-                              c={slots > 0 ? undefined : 'dimmed'}
-                            >
-                              {slots > 0 ? slots : '—'}
-                            </Table.Td>
-                          );
-                        })}
-                    </Table.Tr>
-                  ))}
-                </Table.Tbody>
-              </Table>
-            </Tabs.Panel>
-
-            <Tabs.Panel value="spells" pt="md">
-              <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
-                {selectedClass.spells?.map((spell) => (
-                  <Card key={spell.id} withBorder padding="md" radius="md">
-                    <Stack gap="xs">
-                      <Group justify="space-between" wrap="nowrap">
-                        <Title order={4} lineClamp={1}>
-                          {spell.name}
-                        </Title>
-                        <Badge size="xs" color="blue">
-                          {spell.level === 0 ? 'Заговор' : `${spell.level} lvl`}
-                        </Badge>
-                      </Group>
-                      <Text size="xs" color="purple" fw={500}>
-                        {formatSchoolName(spell.school)}
-                      </Text>
-                      <Text size="sm" c="dimmed" lineClamp={2}>
-                        {spell.description?.blocks?.find((b) => b.type === 'paragraph')?.text ||
-                          'Описание отсутствует...'}
-                      </Text>
-                    </Stack>
-                  </Card>
-                ))}
-              </SimpleGrid>
-            </Tabs.Panel>
-          </Tabs>
+                        </Table.Td>
+                      </Table.Tr>
+                    ))}
+                  </Table.Tbody>
+                </Table>
+              </Paper>
+            </Box>
+          )}
         </Stack>
       </Container>
     );
   }
 
-  // --- OVERVIEW LIST VIEW ---
   return (
     <Container fluid p={0}>
       <Stack gap="xl">
-        {/* Target gap fixed to xs */}
-        <Stack gap="xs">
-          <Title order={1}>Классы персонажей</Title>
-          <Text c="dimmed">
-            Выберите базовый архетип вашего персонажа для просмотра таблицы умений и заклинаний
-          </Text>
-        </Stack>
+        <Group justify="space-between" align="center">
+          <Stack gap="xs">
+            <Title order={1}>Классы персонажей</Title>
+            <Text c="dimmed">Магические, боевые и сакральные пути героев</Text>
+          </Stack>
+          {adminMode && (
+            <Button leftSection={<IconPlus size={16} />} onClick={() => openEditor(null)}>
+              Добавить класс
+            </Button>
+          )}
+        </Group>
 
-        {/* Filters consolidated inline using SimpleGrid structure matching Spells and Items pages */}
-        <SimpleGrid cols={{ base: 1, sm: 2 }} spacing="sm">
-          <TextInput
-            placeholder="Поиск класса..."
-            leftSection={<IconSearch size={16} />}
-            value={search}
-            onChange={(e) => setSearch(e.currentTarget.value)}
-          />
-          <MultiSelect
-            placeholder="Кости Хитов (Hit Dice)"
-            clearable
-            data={uniqueHitDiceOptions}
-            value={hitDiceFilters}
-            onChange={setHitDiceFilters}
-          />
-        </SimpleGrid>
+        <TextInput
+          placeholder="Поиск классов персонажей..."
+          leftSection={<IconSearch size={16} />}
+          value={search}
+          onChange={(e) => setSearch(e.currentTarget.value)}
+          style={{ maxWidth: '400px' }}
+        />
 
         <SimpleGrid cols={{ base: 1, sm: 2, md: 3 }} spacing="md">
           {filteredClasses.map((c) => (
@@ -293,22 +348,164 @@ export function ClassesPage() {
               radius="md"
               withBorder
               style={{ cursor: 'pointer' }}
-              onClick={() => handleSelectClass(c.id)}
+              onClick={() => setSelectedClass(c)}
             >
-              <Group justify="space-between" mb="xs">
-                <Group gap="xs">
-                  <IconSword size={20} style={{ color: 'var(--mantine-color-blue-filled)' }} />
-                  <Title order={3}>{c.name}</Title>
+              <Group justify="space-between" wrap="nowrap">
+                <Group gap="xs" style={{ overflow: 'hidden' }}>
+                  <IconShield
+                    size={20}
+                    style={{ color: 'var(--mantine-color-red-filled)', flexShrink: 0 }}
+                  />
+                  <Title order={4} lineClamp={1}>
+                    {c.name}
+                  </Title>
                 </Group>
-                <Badge variant="light">d{c.hitDieSides}</Badge>
+                <Group gap={4}>
+                  {adminMode && (
+                    <>
+                      <ActionIcon
+                        variant="subtle"
+                        color="blue"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openEditor(c);
+                        }}
+                      >
+                        <IconEdit size={14} />
+                      </ActionIcon>
+                      <ActionIcon
+                        variant="subtle"
+                        color="red"
+                        onClick={(e) => handleDeleteClass(c.id, e)}
+                      >
+                        <IconTrash size={14} />
+                      </ActionIcon>
+                    </>
+                  )}
+                  <ActionIcon variant="subtle" color="gray">
+                    <IconEye size={14} />
+                  </ActionIcon>
+                </Group>
               </Group>
-              <Text size="sm" c="dimmed" lineClamp={3}>
-                {c.description?.text || 'Описание отсутствует...'}
-              </Text>
+              <Group gap={4} mt="xs">
+                <Badge size="xs" variant="light" color="red">
+                  Hit Die: d{c.hitDieSides}
+                </Badge>
+                <Badge size="xs" variant="light" color="blue">
+                  Спасброски: {formatSavingThrows(c.savingThrows)}
+                </Badge>
+              </Group>
             </Card>
           ))}
         </SimpleGrid>
       </Stack>
+
+      {/* Admin Operations Modal Workspace */}
+      <Modal
+        opened={editorOpened}
+        onClose={() => setEditorOpened(false)}
+        title={editingClassId ? 'Редактирование параметров класса' : 'Создание нового класса'}
+        size="100%"
+        radius="md"
+      >
+        <Stack gap="md">
+          <Grid>
+            <Grid.Col span={{ base: 12, md: 6 }}>
+              <Paper p="md" withBorder radius="sm">
+                <Title order={4} mb="sm">
+                  Конфигурация параметров
+                </Title>
+                <Stack gap="xs">
+                  <TextInput
+                    label="Название игрового класса"
+                    value={editName}
+                    onChange={(e) => setEditName(e.target.value)}
+                    required
+                  />
+                  <NumberInput
+                    label="Кость хитов (Hit Die Sides)"
+                    value={editHitDieSides}
+                    onChange={(val) => setEditHitDieSides(Number(val))}
+                    min={4}
+                    max={12}
+                    step={2}
+                  />
+
+                  <Box mt="xs">
+                    <Text size="sm" fw={500} mb={6}>
+                      Владение спасбросками (Saving Throws)
+                    </Text>
+                    <SimpleGrid cols={2} spacing="xs">
+                      {SAVING_THROWS.map((flag) => (
+                        <Checkbox
+                          key={flag.value}
+                          label={flag.label}
+                          checked={(editSavesMask & flag.value) !== 0}
+                          onChange={(e) =>
+                            handleToggleSaveFlag(flag.value, e.currentTarget.checked)
+                          }
+                        />
+                      ))}
+                    </SimpleGrid>
+                  </Box>
+
+                  <Box mt="sm">
+                    <Text size="sm" fw={500} mb={4}>
+                      Текст детального описания и особенностей
+                    </Text>
+                    <ArticleEditor blocks={editBlocks} onChange={setEditBlocks} />
+                  </Box>
+                </Stack>
+              </Paper>
+            </Grid.Col>
+
+            <Grid.Col
+              span={{ base: 12, md: 6 }}
+              style={{ borderLeft: '1px solid var(--mantine-color-default-border)' }}
+            >
+              <Text size="xs" c="dimmed" mb="xs">
+                Живой предпросмотр библиотечной карточки:
+              </Text>
+              <Paper
+                p="xl"
+                withBorder
+                radius="md"
+                shadow="xs"
+                style={{ minHeight: '400px', height: '100%' }}
+              >
+                <Title order={2}>{editName || 'Название нового класса'}</Title>
+                <Group gap="xs" mt="xs" mb="lg">
+                  <Badge color="red">Кость хитов: d{editHitDieSides}</Badge>
+                  <Badge color="blue">Спасброски: {formatSavingThrows(editSavesMask)}</Badge>
+                </Group>
+
+                <Box
+                  style={{
+                    borderTop: '1px solid var(--mantine-color-default-border)',
+                    paddingTop: '12px',
+                  }}
+                >
+                  <ArticleRenderer article={{ title: '', content: editBlocks }} />
+                </Box>
+              </Paper>
+            </Grid.Col>
+          </Grid>
+
+          <Group justify="flex-end" mt="md">
+            <Button variant="outline" color="gray" onClick={() => setEditorOpened(false)}>
+              Отмена
+            </Button>
+            <Button
+              color="green"
+              leftSection={<IconCheck size={16} />}
+              onClick={handleSaveClass}
+              loading={submitting}
+            >
+              Сохранить изменения
+            </Button>
+          </Group>
+        </Stack>
+      </Modal>
     </Container>
   );
 }

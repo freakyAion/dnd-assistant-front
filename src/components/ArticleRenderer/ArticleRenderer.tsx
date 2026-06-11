@@ -1,7 +1,6 @@
 import { Link } from 'react-router-dom';
 import { Anchor, Text, Title } from '@mantine/core';
 
-// Types
 interface TextSpan {
   type: 'text';
   text: string;
@@ -35,7 +34,8 @@ interface HeadingBlock {
 
 interface ParagraphBlock {
   type: 'paragraph';
-  spans: Span[];
+  text?: string;
+  spans?: Span[];
 }
 
 export type Block = HeadingBlock | ParagraphBlock;
@@ -45,7 +45,6 @@ export interface Article {
   content: Block[];
 }
 
-// Span renderer
 function renderSpan(span: Span, index: number) {
   switch (span.type) {
     case 'text':
@@ -72,24 +71,32 @@ function renderSpan(span: Span, index: number) {
           {span.text}
         </Anchor>
       );
+    default:
+      return null;
   }
 }
 
-// Block renderer
 function renderBlock(block: Block, index: number) {
   switch (block.type) {
     case 'heading':
       return (
-        <Title key={index} order={block.level as 1 | 2 | 3 | 4 | 5 | 6} mb="sm">
+        <Title key={index} order={(block.level as 1 | 2 | 3 | 4 | 5 | 6) || 3} mb="sm">
           {block.text}
         </Title>
       );
-    case 'paragraph':
+    case 'paragraph': {
+      const elements = Array.isArray(block.spans)
+        ? block.spans.map((span, i) => renderSpan(span, i))
+        : block.text || '';
+
       return (
-        <Text key={index} mb="md">
-          {block.spans.map((span, i) => renderSpan(span, i))}
+        <Text key={index} mb="md" size="md" style={{ lineHeight: 1.6 }}>
+          {elements}
         </Text>
       );
+    }
+    default:
+      return null;
   }
 }
 
@@ -100,10 +107,12 @@ interface ArticleRendererProps {
 export function ArticleRenderer({ article }: ArticleRendererProps) {
   return (
     <div>
-      <Title order={1} mb="lg">
-        {article.title}
-      </Title>
-      {article.content.map((block, i) => renderBlock(block, i))}
+      {article.title && (
+        <Title order={1} mb="lg">
+          {article.title}
+        </Title>
+      )}
+      {Array.isArray(article.content) && article.content.map((block, i) => renderBlock(block, i))}
     </div>
   );
 }

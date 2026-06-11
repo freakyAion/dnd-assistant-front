@@ -1,9 +1,20 @@
 import { useEffect, useState } from 'react';
-import { IconArrowLeft, IconBook, IconClock, IconMapPins, IconUsers } from '@tabler/icons-react';
+import {
+  IconArrowLeft,
+  IconBook,
+  IconCalendar,
+  IconClock,
+  IconMapPins,
+  IconUsers,
+} from '@tabler/icons-react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Badge, Button, Container, Group, Loader, Stack, Tabs, Text, Title } from '@mantine/core';
 import { notifications } from '@mantine/notifications';
+import { CampaignsModule } from '@/components/World/CampaignsModule';
+import { HistoryModule } from '@/components/World/HistoryModule';
 import { LocationsModule } from '@/components/World/LocationsModule';
+import { NpcsModule } from '@/components/World/NPCsModule';
+import { WorldDescriptionModule } from '@/components/World/WorldDescriptionModule';
 import { getUserId } from '@/store/auth';
 import { getWorldDetails, World } from '../api/api';
 import { ArticleRenderer, Block } from '../components/ArticleRenderer/ArticleRenderer';
@@ -83,23 +94,23 @@ export function WorldSheetPage() {
             <Tabs.Tab value="history" leftSection={<IconClock size={16} />}>
               История ({world.historicalEvents?.length || 0})
             </Tabs.Tab>
+            <Tabs.Tab value="campaigns" leftSection={<IconCalendar size={16} />}>
+              Игровые столы
+            </Tabs.Tab>
           </Tabs.List>
 
           <Tabs.Panel value="lore" pt="xl">
-            {world.description &&
-            world.description.blocks &&
-            world.description.blocks.length > 0 ? (
-              <ArticleRenderer
-                article={{
-                  title: 'История и описание',
-                  content: world.description.blocks as Block[],
-                }}
-              />
-            ) : (
-              <Text c="dimmed">
-                Описание этого мира пока пусто. Перейдите в редактор, чтобы добавить лор.
-              </Text>
-            )}
+            <WorldDescriptionModule
+              worldId={world.id}
+              initialDescription={world.description}
+              isOwner={isOwner}
+              onDescriptionUpdated={(updatedDesc) => {
+                setWorld((prev) => {
+                  if (!prev) return null;
+                  return { ...prev, description: updatedDesc };
+                });
+              }}
+            />
           </Tabs.Panel>
 
           <Tabs.Panel value="locations" pt="xl">
@@ -112,11 +123,32 @@ export function WorldSheetPage() {
           </Tabs.Panel>
 
           <Tabs.Panel value="npcs" pt="xl">
-            <Text c="dimmed">Модуль управления NPC скоро появится.</Text>
+            <NpcsModule
+              worldId={world.id}
+              initialNpcs={world.npcs || []}
+              isOwner={isOwner}
+              onNpcAdded={(newNpc) => {
+                setWorld((prev) => {
+                  if (!prev) return null;
+                  return {
+                    ...prev,
+                    npcs: [...(prev.npcs || []), newNpc],
+                  };
+                });
+              }}
+            />
           </Tabs.Panel>
 
           <Tabs.Panel value="history" pt="xl">
-            <Text c="dimmed">Модуль истории и хронологии скоро появится.</Text>
+            <HistoryModule
+              worldId={world.id}
+              initialEvents={world.historicalEvents || []}
+              isOwner={isOwner}
+            />
+          </Tabs.Panel>
+
+          <Tabs.Panel value="campaigns" pt="xl">
+            <CampaignsModule worldId={world.id} isOwner={isOwner} />
           </Tabs.Panel>
         </Tabs>
       </Stack>

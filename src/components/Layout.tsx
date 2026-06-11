@@ -2,7 +2,7 @@ import {
   IconArchive,
   IconBackpack,
   IconBooks,
-  IconGlobe, // <-- Add this icon
+  IconGlobe,
   IconHome2,
   IconLogin,
   IconLogout,
