@@ -1,0 +1,11 @@
+"filename", "language", "Markdown", "CSV", "JSON", "TypeScript JSX", "TypeScript", "comment", "blank", "total"
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\details.md", "Markdown", 60, 0, 0, 0, 0, 0, 6, 66
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\diff-details.md", "Markdown", 9, 0, 0, 0, 0, 0, 6, 15
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\diff.csv", "CSV", 0, 2, 0, 0, 0, 0, 0, 2
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\diff.md", "Markdown", 12, 0, 0, 0, 0, 0, 7, 19
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\results.csv", "CSV", 0, 53, 0, 0, 0, 0, 0, 53
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\results.json", "JSON", 0, 0, 1, 0, 0, 0, 0, 1
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\results.md", "Markdown", 39, 0, 0, 0, 0, 0, 7, 46
+"d:\Projects\dnd-assistant-front\src\api\api.ts", "TypeScript", 0, 0, 0, 0, 15, 0, 0, 15
+"d:\Projects\dnd-assistant-front\src\pages\CharacterSheet.page.tsx", "TypeScript JSX", 0, 0, 0, 944, 0, 19, 45, 1008
+"Total", "-", 120, 55, 1, 944, 15, 19, 71, 1225

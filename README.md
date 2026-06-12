@@ -1,34 +1,71 @@
-# Mantine Vite template
+# D&D Assistant (Frontend)
 
-## Features
+Веб-приложение для управления кампаниями, персонажами и мирами в Dungeons & Dragons. Клиентская часть проекта (Frontend).
 
-This template comes with the following features:
+## Краткое описание
+Проект представляет собой интерактивный D&D-помощник, позволяющий как Мастерам Подземелий (DM), так и игрокам автоматизировать игровой процесс. В приложении реализованы справочники правил, конструктор персонажей с отслеживанием характеристик и инвентаря, а также система создания авторских миров (World-building) с локациями, NPC и историческими событиями.
 
-- [PostCSS](https://postcss.org/) with [mantine-postcss-preset](https://mantine.dev/styles/postcss-preset)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Storybook](https://storybook.js.org/)
-- [Vitest](https://vitest.dev/) setup with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro)
-- ESLint setup with [eslint-config-mantine](https://github.com/mantinedev/eslint-config-mantine)
+## Стек технологий
+* **Ядро:** React 19, TypeScript
+* **Сборщик:** Vite 8
+* **UI-библиотека:** Mantine (v8) для компонентов, форм, дат и уведомлений
+* **Маршрутизация:** React Router v7
+* **Сетевые запросы:** Axios
+* **Тестирование и UI-документация:** Vitest, Storybook
 
-## npm scripts
+## Структура проекта
+Основные директории внутри `src/`:
+* `api/` — конфигурация Axios и модули для взаимодействия с backend API.
+* `components/` — переиспользуемые UI-компоненты (включая защиту маршрутов `AdminGuard`, редакторы статей `ArticleEditor`, модули миров).
+* `pages/` — компоненты страниц, соответствующие маршрутам (CharacterSheet, Worlds, Rules, Editor и др.).
+* `store/` — управление состоянием приложения (например, авторизация в `auth.tsx`).
+* `Router.tsx` — конфигурация всех маршрутов приложения.
 
-## Build and dev scripts
+## Как запустить
+Проект использует менеджер пакетов Yarn (v4.13.0).
 
-- `dev` – start development server
-- `build` – build production version of the app
-- `preview` – locally preview production build
+1. Установите зависимости:
+   ```bash
+   yarn install
+   ```
+2. Запустите сервер для разработки:
+   ```bash
+   yarn dev
+   ```
+3. Для сборки проекта (production):
+   ```bash
+   yarn build
+   ```
 
-### Testing scripts
+## Переменные окружения
+На данный момент в приложении жестко закодирован базовый URL для API: `https://localhost:7178/api`. 
+Рекомендуется вынести эту настройку в `.env` файл (например, `VITE_API_BASE_URL`), чтобы легко переключаться между локальным сервером и production-окружением. Для работы аутентификации токены сохраняются на стороне клиента.
 
-- `typecheck` – checks TypeScript types
-- `lint` – runs ESLint
-- `prettier:check` – checks files with Prettier
-- `vitest` – runs vitest tests
-- `vitest:watch` – starts vitest watch
-- `test` – runs `vitest`, `prettier:check`, `lint` and `typecheck` scripts
+## Как применить миграции
+Поскольку данный репозиторий представляет собой **Frontend-часть** приложения, здесь нет базы данных и миграций. 
+Все миграции (Entity Framework Core для PostgreSQL) должны применяться на стороне Backend-сервера (ASP.NET). Для этого в папке бекенда обычно используются команды:
+```bash
+dotnet ef migrations add <MigrationName>
+dotnet ef database update
+```
 
-### Other scripts
+## Основные реализованные функции
+* **Аутентификация и авторизация:** Регистрация, логин и ограничение доступа к функциям администратора.
+* **Справочник системы (Книги):** Просмотр правил, заклинаний, предметов, классов, рас и происхождений (backgrounds).
+* **Управление персонажами:**
+  * Создание персонажа (визард с выбором расы, класса и предыстории).
+  * Лист персонажа: отслеживание HP, спасбросков от смерти, характеристик, слотов заклинаний и подготовленных заклинаний.
+  * Инвентарь: экипировка и настройка предметов.
+* **World-building (Миры и Кампании):**
+  * Создание миров с описанием, картами, локациями, NPC и историческими эпохами.
+  * Организация кампаний с системой инвайт-кодов для присоединения игроков и отслеживанием игровых сессий.
 
-- `storybook` – starts storybook dev server
-- `storybook:build` – build production storybook bundle to `storybook-static`
-- `prettier:write` – formats all files with Prettier
+## Основные API-модули
+Все запросы инкапсулированы в `src/api/api.ts`:
+* **Users:** `/users/login`, `/users/register`.
+* **Rules & Compendium:** `/rules`, `/spells`, `/items`.
+* **Character Options:** `/classes`, `/characteroptions/species`, `/characteroptions/backgrounds`.
+* **Characters:** CRUD операции, обновление биографии (`/biography`), показателей здоровья (`/vitals`), инвентаря (`/inventory`), слотов заклинаний и базовых характеристик (`/core-stats`).
+* **Worlds:** Управление мирами (`/worlds`), загрузка карт (`/worlds/{id}/map`), локациями (`/locations`), NPC (`/npcs`) и историей (`/history`).
+* **Campaigns:** Создание сессий, генерация инвайт-кодов и присоединение игроков (`/campaigns/invite/{code}/join`).
+* **Images:** Загрузка файлов (карт и изображений) через `/images` (Multipart Form Data).

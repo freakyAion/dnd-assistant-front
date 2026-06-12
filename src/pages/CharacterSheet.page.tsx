@@ -1522,8 +1522,6 @@ export function CharacterSheetPage() {
             autosize
           />
 
-          {/* ARTICLE EDITOR COMPONENT INTEGRATION */}
-          {/* ARTICLE EDITOR COMPONENT INTEGRATION */}
           <Stack gap={2}>
             <Text size="sm" fw={500}>
               Предыстория и мотивы

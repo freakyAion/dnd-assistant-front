@@ -1,0 +1,60 @@
+"filename", "language", "HTML", "JavaScript", "YAML", "JSON with Comments", "JSON", "TypeScript", "TypeScript JSX", "Markdown", "CSV", "XML", "comment", "blank", "total"
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\details.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 60, 0, 0, 0, 6, 66
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\diff-details.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 9, 0, 0, 0, 6, 15
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\diff.csv", "CSV", 0, 0, 0, 0, 0, 0, 0, 0, 2, 0, 0, 0, 2
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\diff.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 7, 19
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\results.csv", "CSV", 0, 0, 0, 0, 0, 0, 0, 0, 53, 0, 0, 0, 53
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\results.json", "JSON", 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1
+"d:\Projects\dnd-assistant-front\.VSCodeCounter\2026-06-11_13-38-55\results.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 39, 0, 0, 0, 7, 46
+"d:\Projects\dnd-assistant-front\.github\workflows\npm_test.yml", "YAML", 0, 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 4, 28
+"d:\Projects\dnd-assistant-front\.prettierrc.mjs", "JavaScript", 0, 33, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 35
+"d:\Projects\dnd-assistant-front\.storybook\main.ts", "TypeScript", 0, 0, 0, 0, 0, 15, 0, 0, 0, 0, 0, 3, 18
+"d:\Projects\dnd-assistant-front\.storybook\preview.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 52, 0, 0, 0, 1, 10, 63
+"d:\Projects\dnd-assistant-front\.stylelintrc.json", "JSON", 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 1, 29
+"d:\Projects\dnd-assistant-front\.yarnrc.yml", "YAML", 0, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0, 2, 4
+"d:\Projects\dnd-assistant-front\README.md", "Markdown", 0, 0, 0, 0, 0, 0, 0, 24, 0, 0, 0, 11, 35
+"d:\Projects\dnd-assistant-front\eslint.config.js", "JavaScript", 0, 20, 0, 0, 0, 0, 0, 0, 0, 0, 1, 2, 23
+"d:\Projects\dnd-assistant-front\index.html", "HTML", 16, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 17
+"d:\Projects\dnd-assistant-front\package-lock.json", "JSON", 0, 0, 0, 0, 9918, 0, 0, 0, 0, 0, 0, 1, 9919
+"d:\Projects\dnd-assistant-front\package.json", "JSON", 0, 0, 0, 0, 70, 0, 0, 0, 0, 0, 0, 1, 71
+"d:\Projects\dnd-assistant-front\postcss.config.cjs", "JavaScript", 0, 14, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 15
+"d:\Projects\dnd-assistant-front\renovate.json", "JSON", 0, 0, 0, 0, 21, 0, 0, 0, 0, 0, 0, 1, 22
+"d:\Projects\dnd-assistant-front\src\App.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 21, 0, 0, 0, 0, 4, 25
+"d:\Projects\dnd-assistant-front\src\Router.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 45, 0, 0, 0, 0, 8, 53
+"d:\Projects\dnd-assistant-front\src\api\api.ts", "TypeScript", 0, 0, 0, 0, 0, 565, 0, 0, 0, 0, 1, 95, 661
+"d:\Projects\dnd-assistant-front\src\components\AdminGuard\AdminGuard.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 6, 0, 0, 0, 0, 3, 9
+"d:\Projects\dnd-assistant-front\src\components\ArticleEditor\ArticleEditor.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 208, 0, 0, 0, 0, 12, 220
+"d:\Projects\dnd-assistant-front\src\components\ArticleRenderer\ArticleRenderer.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 104, 0, 0, 0, 0, 15, 119
+"d:\Projects\dnd-assistant-front\src\components\Layout.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 127, 0, 0, 0, 1, 11, 139
+"d:\Projects\dnd-assistant-front\src\components\World\CampaignsModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 288, 0, 0, 0, 0, 14, 302
+"d:\Projects\dnd-assistant-front\src\components\World\HistoryModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 308, 0, 0, 0, 1, 19, 328
+"d:\Projects\dnd-assistant-front\src\components\World\LocationsModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 226, 0, 0, 0, 0, 18, 244
+"d:\Projects\dnd-assistant-front\src\components\World\NPCsModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 452, 0, 0, 0, 7, 29, 488
+"d:\Projects\dnd-assistant-front\src\components\World\WorldDescriptionModule.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 137, 0, 0, 0, 3, 12, 152
+"d:\Projects\dnd-assistant-front\src\favicon.svg", "XML", 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 2
+"d:\Projects\dnd-assistant-front\src\main.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 2, 5
+"d:\Projects\dnd-assistant-front\src\pages\Backgrounds.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 444, 0, 0, 0, 3, 30, 477
+"d:\Projects\dnd-assistant-front\src\pages\CharacterSheet.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 1492, 0, 0, 0, 34, 101, 1627
+"d:\Projects\dnd-assistant-front\src\pages\Characters.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 454, 0, 0, 0, 8, 29, 491
+"d:\Projects\dnd-assistant-front\src\pages\Classes.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 472, 0, 0, 0, 6, 34, 512
+"d:\Projects\dnd-assistant-front\src\pages\Editor.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 237, 0, 0, 0, 5, 16, 258
+"d:\Projects\dnd-assistant-front\src\pages\Home.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 226, 0, 0, 0, 7, 12, 245
+"d:\Projects\dnd-assistant-front\src\pages\Items.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 859, 0, 0, 0, 10, 48, 917
+"d:\Projects\dnd-assistant-front\src\pages\JoinCampaign.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 90, 0, 0, 0, 0, 9, 99
+"d:\Projects\dnd-assistant-front\src\pages\Login.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 79, 0, 0, 0, 1, 7, 87
+"d:\Projects\dnd-assistant-front\src\pages\Register.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 91, 0, 0, 0, 1, 7, 99
+"d:\Projects\dnd-assistant-front\src\pages\Rules.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 451, 0, 0, 0, 7, 36, 494
+"d:\Projects\dnd-assistant-front\src\pages\Species.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 434, 0, 0, 0, 2, 30, 466
+"d:\Projects\dnd-assistant-front\src\pages\Spells.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 633, 0, 0, 0, 3, 38, 674
+"d:\Projects\dnd-assistant-front\src\pages\WorldSheet.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 144, 0, 0, 0, 0, 14, 158
+"d:\Projects\dnd-assistant-front\src\pages\Worlds.page.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 192, 0, 0, 0, 0, 15, 207
+"d:\Projects\dnd-assistant-front\src\store\auth.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 53, 0, 0, 0, 1, 10, 64
+"d:\Projects\dnd-assistant-front\src\testing\test-article.json", "JSON", 0, 0, 0, 0, 28, 0, 0, 0, 0, 0, 0, 0, 28
+"d:\Projects\dnd-assistant-front\src\theme.ts", "TypeScript", 0, 0, 0, 0, 0, 3, 0, 0, 0, 0, 1, 2, 6
+"d:\Projects\dnd-assistant-front\src\vite-env.d.ts", "TypeScript", 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 2
+"d:\Projects\dnd-assistant-front\test-utils\index.ts", "TypeScript", 0, 0, 0, 0, 0, 4, 0, 0, 0, 0, 0, 2, 6
+"d:\Projects\dnd-assistant-front\test-utils\render.tsx", "TypeScript JSX", 0, 0, 0, 0, 0, 0, 12, 0, 0, 0, 0, 2, 14
+"d:\Projects\dnd-assistant-front\tsconfig.json", "JSON with Comments", 0, 0, 0, 25, 0, 0, 0, 0, 0, 0, 0, 1, 26
+"d:\Projects\dnd-assistant-front\vite.config.mjs", "JavaScript", 0, 13, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3, 16
+"d:\Projects\dnd-assistant-front\vitest.setup.mjs", "JavaScript", 0, 24, 0, 0, 0, 0, 0, 0, 0, 0, 0, 5, 29
+"Total", "-", 16, 104, 26, 25, 10066, 587, 8340, 144, 55, 1, 106, 760, 20230
