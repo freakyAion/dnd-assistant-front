@@ -1466,11 +1466,10 @@ export function CharacterSheetPage() {
         opened={bioModalOpened}
         onClose={closeBioModal}
         title="Редактирование биографии"
-        size="xl" // Expanding to size="xl" gives ArticleEditor more horizontal real estate
+        size="xl" 
         radius="md"
       >
         <Stack gap="md">
-          {/* Alignment Selector */}
           <Select
             label="Мировоззрение (Alignment)"
             placeholder="Выберите мировоззрение..."
