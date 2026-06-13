@@ -3,7 +3,7 @@ import { notifications } from '@mantine/notifications';
 import { getToken } from '../store/auth';
 
 const client = axios.create({
-  baseURL: 'https://localhost:7178/api',
+  baseURL: import.meta.env.VITE_API_URL ?? 'https://localhost:7178/api',
   withCredentials: true,
 });
 
